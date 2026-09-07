@@ -1,0 +1,1780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Superintendent Receipts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Geist:wght@400..800&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* ── Clean design system tokens ─────────────────────────────────────
+   Palette, type, radii and elevation per .claude/skills/clean.
+   Two neutrals and no accent: pure white, warm off-white, near-black.
+   No gradients, no colour, no decorative shadow. */
+:root{
+  --background:#FFFFFF;
+  --foreground:#0F0E0C;
+  --card:#FFFFFF;
+  --muted:#F7F6F2;            /* warm off-white — alternate surfaces */
+  --muted-foreground:#6B6760;
+  --subtle-foreground:#A8A49F;
+  --border:#E8E6E1;
+  --input:#E8E6E1;
+  --ring:#0F0E0C;
+  --primary:#0F0E0C;
+  --primary-foreground:#FFFFFF;
+  --primary-hover:#333333;
+  --accent:#F7F6F2;           /* ghost-button hover */
+  --sidebar:#F7F6F2;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.09);
+  --radius:12px;              /* cards */
+  --radius-btn:8px;           /* buttons and inputs */
+  --font-display:"Geist","DM Sans",sans-serif;
+  --font-sans:"DM Sans","Geist",sans-serif;
+  --font-mono:"DM Sans","Geist",sans-serif;
+  --font-code:"Geist Mono","JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --background:#0F0E0C;
+    --foreground:#F7F6F2;
+    --card:#171614;
+    --muted:#1E1C19;
+    --muted-foreground:#A8A49F;
+    --subtle-foreground:#6B6760;
+    --border:#2A2724;
+    --input:#2A2724;
+    --ring:#F7F6F2;
+    --primary:#F7F6F2;
+    --primary-foreground:#0F0E0C;
+    --primary-hover:#DEDBD3;
+    --accent:#1E1C19;
+    --sidebar:#131211;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+    --shadow-hover:0 6px 20px rgba(0,0,0,.5);
+    --shadow-lg:0 8px 30px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --background:#0F0E0C;
+  --foreground:#F7F6F2;
+  --card:#171614;
+  --muted:#1E1C19;
+  --muted-foreground:#A8A49F;
+  --subtle-foreground:#6B6760;
+  --border:#2A2724;
+  --input:#2A2724;
+  --ring:#F7F6F2;
+  --primary:#F7F6F2;
+  --primary-foreground:#0F0E0C;
+  --primary-hover:#DEDBD3;
+  --accent:#1E1C19;
+  --sidebar:#131211;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.5);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.55);
+}
+
+/* ── base ──────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html,body{height:100%}
+/* Pure white ground. No gradient: rhythm comes from alternating white
+   against the warm off-white surface, never from colour. */
+body{margin:0;color:var(--foreground);background:var(--background);
+  font:16px/1.65 var(--font-sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-family:var(--font-display);font-weight:600;
+  letter-spacing:-.015em;line-height:1.25;text-wrap:balance;color:var(--foreground)}
+h2{font-weight:700;letter-spacing:-.02em}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit;margin:0}
+button{cursor:pointer;background:none;border:0}
+a{color:inherit}
+:focus-visible{outline:none;box-shadow:0 0 0 1px var(--background),0 0 0 3px var(--ring);border-radius:4px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";letter-spacing:-.005em}
+.tnum{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted-foreground)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+[hidden]{display:none !important}
+/* overline: the signature device for introducing a block */
+.label{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-muted,var(--subtle-foreground))}
+
+/* ── motion ────────────────────────────────────────────────────────
+   Motion answers what a person did — a value recomputing, a panel
+   opening. No staggered entrance on every card: that reads as
+   decoration and slows the screen down on arrival. */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.pane.on{animation:fadeIn .18s ease-out both}
+.bar-track i,.alloc-meter i{transition:width .25s ease}
+.summary .v,.stat .v{transition:color .18s ease}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important}
+}
+/* ── primitives ────────────────────────────────────────────────────── */
+/* Buttons: 8px radius, never pills. Ghost hovers to the warm surface,
+   primary lightens. Press is scale(0.98). */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;padding:0 24px;border-radius:var(--radius-btn);
+  font-size:14px;font-weight:500;white-space:nowrap;
+  border:1px solid var(--border);background:transparent;color:var(--foreground);
+  transition:all .18s ease}
+.btn:hover:not(:disabled){background:var(--accent)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.btn.primary:hover:not(:disabled){background:var(--primary-hover);border-color:var(--primary-hover)}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover:not(:disabled){background:var(--accent)}
+.btn.sm{height:32px;padding:0 16px;font-size:14px}
+.btn.xs{height:28px;padding:0 12px;font-size:12px}
+.btn.icon{width:32px;height:32px;padding:0}
+
+.input,.select{height:40px;padding:0 16px;border-radius:var(--radius-btn);
+  border:1px solid var(--input);background:var(--card);font-size:14px;
+  width:100%;transition:all .18s ease}
+.input:hover,.select:hover{border-color:var(--subtle-foreground)}
+.input.sm,.select.sm{height:32px;font-size:14px;padding:0 12px}
+.input:focus,.select:focus{outline:none;box-shadow:0 0 0 1px var(--ring)}
+.input.mono{font-family:var(--font-mono)}
+/* chevron drawn as an SVG, not a CSS gradient triangle */
+.select{appearance:none;padding-right:32px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6760' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-size:16px 16px;background-position:right 12px center;
+  background-repeat:no-repeat}
+.check{display:inline-flex;align-items:flex-start;gap:8px;cursor:pointer}
+.check input{appearance:none;width:16px;height:16px;flex:none;margin-top:1px;
+  border:1px solid var(--foreground);border-radius:4px;background:var(--background);
+  display:grid;place-content:center}
+.check input:checked{background:var(--primary);border-color:var(--primary)}
+.check input:checked::after{content:"";width:9px;height:5px;border-left:1.8px solid var(--primary-foreground);
+  border-bottom:1.8px solid var(--primary-foreground);transform:rotate(-45deg) translateY(-1px)}
+
+.switch{position:relative;width:40px;height:24px;flex:none;border-radius:999px;
+  border:1px solid var(--border);background:var(--muted);transition:background .18s,border-color .18s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;
+  border-radius:50%;background:var(--background);box-shadow:var(--shadow-sm);transition:transform .18s}
+.switch[aria-checked="true"]{background:var(--primary);border-color:var(--primary)}
+.switch[aria-checked="true"]::after{transform:translateX(16px)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;
+  padding:4px 12px;font-size:12px;font-weight:500;letter-spacing:.01em;
+  border:1px solid var(--border);white-space:nowrap}
+.badge.solid{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.badge.outline{color:var(--muted-foreground)}
+.badge.striped{border-color:var(--foreground);color:var(--foreground);background:var(--muted)}
+.badge.dot::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+
+/* Cards: white, 1px warm border, 12px radius, barely-there shadow that
+   lifts a little on hover. Structure only — never decoration. */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+  transition:box-shadow .18s ease,transform .18s ease}
+.card>header{padding:28px 32px 20px;display:flex;align-items:flex-start;
+  justify-content:space-between;gap:20px;flex-wrap:wrap}
+.card>header.ruled{border-bottom:1px solid var(--border);padding-bottom:24px}
+.card>header h3{font-size:20px;line-height:1.25}
+.card>header .desc{font-size:14px;color:var(--muted-foreground);margin-top:8px;
+  max-width:72ch;line-height:1.6}
+.card .body{padding:28px 32px}
+.card .body.tight{padding:0}
+.card>footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;
+  align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sep{height:1px;background:var(--border);border:0;margin:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:12px}
+.kv dt{color:var(--muted-foreground)}
+.kv dd{margin:0;text-align:right;font-family:var(--font-mono);font-size:12px}
+.grid{display:grid;gap:24px}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:32px}
+.callout{border:1px solid var(--border);border-radius:var(--radius-btn);
+  background:var(--muted);padding:16px 20px;font-size:14px;line-height:1.6;
+  color:var(--muted-foreground)}
+.callout strong{color:var(--foreground);font-weight:600}
+/* ── shell ─────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:264px minmax(0,1fr);min-height:100%}
+.side{background:var(--sidebar);border-right:1px solid var(--border);
+  /* flat surface, no blur */
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:28px;padding:28px 16px 24px}
+.brand{display:flex;flex-direction:column;gap:4px;padding:0 4px}
+.brand .mark{display:flex;align-items:center;gap:8px}
+.brand .glyph{width:28px;height:28px;border-radius:var(--radius-btn);background:var(--primary);
+  color:var(--primary-foreground);display:grid;place-content:center;
+  font-size:12px;font-weight:600;letter-spacing:.02em;flex:none}
+.brand h1{font-size:16px;line-height:1.2;font-weight:600}
+.brand .sub{font-size:14px;color:var(--muted-foreground);padding-left:40px}
+.side-group{display:flex;flex-direction:column;gap:8px}
+.side-group>.label{padding:0 12px}
+.trip{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);
+  background:var(--card);padding:12px 12px}
+.trip .t{font-size:12px;font-weight:600;line-height:1.35}
+.trip .legs{display:flex;flex-direction:column;gap:4px;margin-top:8px;
+  font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground)}
+.trip .legs span{display:flex;justify-content:space-between;gap:8px}
+/* SVG icons inherit text colour and sit on the text baseline */
+.ic{display:block;flex:none}
+
+.nav{display:flex;flex-direction:column;gap:4px;list-style:none;margin:0;padding:0}
+.nav button{display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:12px;
+  width:100%;text-align:left;padding:8px 12px;border-radius:var(--radius-btn);
+  font-size:14px;color:var(--muted-foreground);transition:all .18s ease}
+.nav button:hover{background:var(--accent);color:var(--foreground)}
+.nav .n{display:grid;place-content:center;color:var(--subtle-foreground);
+  transition:color .18s ease}
+.nav button:hover .n{color:var(--foreground)}
+.nav li.on button{background:var(--accent);color:var(--foreground);font-weight:500}
+.nav li.on .n{color:var(--foreground)}
+.nav .tick{font-size:12px;color:var(--subtle-foreground);font-variant-numeric:tabular-nums}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:4px;padding:0}
+
+/* ── topbar + panes ────────────────────────────────────────────────── */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;background:var(--background);
+  border-bottom:1px solid var(--border);padding:32px 40px 0}
+.topbar .head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+/* dramatic size contrast between the page title and everything else */
+.topbar h2{font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.025em}
+.topbar .lede{font-size:16px;color:var(--muted-foreground);margin-top:8px;
+  max-width:74ch;line-height:1.6}
+.tabs{display:flex;gap:4px;background:var(--muted);border-radius:var(--radius);padding:4px;flex:none}
+.tabs button{height:28px;padding:0 12px;border-radius:calc(var(--radius) - 3px);
+  font-size:12px;font-weight:500;color:var(--muted-foreground)}
+.tabs button[aria-selected="true"]{background:var(--background);color:var(--foreground);
+  box-shadow:var(--shadow-sm)}
+.summary{display:flex;overflow-x:auto;margin:16px -24px 0;padding:0 24px;
+  border-top:1px solid var(--border)}
+.summary .cell{padding:8px 24px 12px;border-right:1px solid var(--border);min-width:128px;flex:none}
+.summary .cell:first-child{padding-left:0}
+.summary .cell:last-child{border-right:0}
+.summary .k{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground)}
+.summary .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+  font-size:16px;font-weight:500;margin-top:4px;letter-spacing:-.02em}
+.summary .cell.strike .v{text-decoration:line-through;color:var(--muted-foreground);
+  text-decoration-thickness:1.5px}
+.summary .sub{font-size:12px;color:var(--subtle-foreground);font-family:var(--font-mono)}
+.pane{display:none;padding:40px 40px 96px}
+.pane.on{display:block}
+.pane-wide{max-width:1180px}
+
+/* ── stepper: the seven numbered steps, on the claim page ──────────── */
+.stepper{display:flex;list-style:none;margin:0 0 20px;padding:0;overflow-x:auto}
+.stepper li{flex:1;min-width:88px;position:relative}
+.stepper li::before,.stepper li::after{content:"";position:absolute;top:15px;height:2px;
+  background:var(--border);transition:background .25s}
+.stepper li::before{left:0;right:50%}
+.stepper li::after{left:50%;right:0}
+.stepper li:first-child::before,.stepper li:last-child::after{display:none}
+.stepper li.done::before,.stepper li.done::after,.stepper li.on::before{background:var(--foreground)}
+.stepper button{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
+  gap:8px;width:100%;padding:0}
+.stepper .dot{width:32px;height:32px;border-radius:50%;display:grid;place-content:center;
+  font-size:14px;font-weight:500;background:var(--background);border:1px solid var(--border);
+  color:var(--subtle-foreground);transition:all .18s ease}
+.stepper li.done .dot{border-color:var(--foreground);color:var(--foreground)}
+.stepper li.on .dot{background:var(--primary);border-color:var(--primary);
+  color:var(--primary-foreground)}
+.stepper .lb{font-size:12px;line-height:1.3;text-align:center;color:var(--muted-foreground);
+  transition:color .18s ease}
+.stepper li.on .lb{color:var(--foreground);font-weight:600}
+.stepper button:hover .dot{border-color:var(--foreground)}
+.stepper button:hover .lb{color:var(--foreground)}
+
+/* ── two-column review split ───────────────────────────────────────── */
+.split{display:grid;grid-template-columns:minmax(300px,340px) minmax(0,1fr);
+  gap:20px;align-items:start}
+.doc-col{position:sticky;top:150px;display:flex;flex-direction:column;gap:12px}
+.doc-frame{border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);
+  padding:16px;box-shadow:var(--shadow)}
+.doc-frame svg{display:block;width:100%;height:auto;border-radius:3px;
+  box-shadow:0 1px 3px rgb(0 0 0 / .18)}
+.doc-meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;
+  color:var(--muted-foreground);font-family:var(--font-mono)}
+@media (max-width:1080px){
+  .split{grid-template-columns:1fr}
+  .doc-col{position:static}
+}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto}
+}
+/* ── ledger ────────────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+table.tbl th{text-align:left;font-size:12px;font-weight:500;
+  color:var(--muted-foreground);padding:12px 12px;
+  border-bottom:1px solid var(--border);white-space:nowrap;background:var(--card)}
+table.tbl td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top}
+table.tbl tbody tr{transition:background .18s}
+table.tbl tbody tr:hover{background:color-mix(in srgb,var(--muted) 55%,transparent)}
+table.tbl tr:last-child td{border-bottom:0}
+table.tbl th.r,table.tbl td.r{text-align:right}
+table.tbl td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.tbl tfoot td{border-top:1px solid var(--border);border-bottom:0;font-weight:600;
+  background:var(--muted)}
+
+.ledger tbody tr{position:relative}
+.ledger td.st{width:3px;padding:0;background:transparent}
+.ledger tr[data-st="excluded"] td.st{background:var(--foreground)}
+.ledger tr[data-st="review"] td.st{background:var(--subtle-foreground)}
+.ledger tr[data-st="excluded"] .amt{text-decoration:line-through;
+  text-decoration-thickness:1.5px;color:var(--muted-foreground)}
+.ledger tr[data-st="excluded"]{background:color-mix(in srgb,var(--muted) 60%,transparent)}
+.orig{font-size:14px;line-height:1.35;
+  font-family:"Malgun Gothic","Microsoft YaHei","Noto Sans CJK KR","Apple SD Gothic Neo",var(--font-sans)}
+.gloss{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.gloss::before{content:"→ ";color:var(--subtle-foreground)}
+.conf{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);
+  font-size:12px;color:var(--muted-foreground)}
+.conf .bar{width:26px;height:4px;border-radius:2px;background:var(--muted);
+  border:1px solid var(--border);overflow:hidden;flex:none}
+.conf .bar i{display:block;height:100%;background:var(--foreground)}
+.conf.low{color:var(--foreground);font-weight:600}
+.edited{font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground);
+  margin-top:4px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.edited s{text-decoration-thickness:1px}
+.rule-line{display:flex;align-items:flex-start;gap:8px;font-size:12px;
+  color:var(--muted-foreground);margin-top:4px;line-height:1.4}
+.rule-line .rid{font-family:var(--font-mono);font-size:12px;font-weight:600;
+  border:1px solid var(--border);border-radius:3px;padding:0 4px;color:var(--foreground);flex:none}
+.rule-line.satisfied .rid{border-style:dashed}
+.line-note{margin-top:8px}
+.alloc-chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);
+  font-size:12px;border:1px solid var(--border);border-radius:999px;padding:1px 8px;
+  color:var(--muted-foreground)}
+
+/* ── policy panel ──────────────────────────────────────────────────── */
+.rules{display:flex;flex-direction:column;gap:0}
+.rule{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--border)}
+.rule:last-child{border-bottom:0}
+.rule .rid{font-family:var(--font-mono);font-size:12px;font-weight:600;
+  border:1px solid var(--border);border-radius:4px;padding:4px 8px;flex:none}
+.rule .t{font-size:14px;font-weight:500}
+.rule .d{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.rule .d .type{font-size:12px;color:var(--subtle-foreground)}
+.rule .bite{font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground);
+  text-align:right;min-width:74px}
+
+/* ── allocation ────────────────────────────────────────────────────── */
+.alloc-rows{display:flex;flex-direction:column;gap:8px}
+.alloc-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 96px 30px;gap:8px;align-items:center}
+.alloc-row .owner{font-size:12px;color:var(--muted-foreground);font-family:var(--font-mono);
+  grid-column:1;margin-top:-4px}
+.alloc-meter{height:8px;border-radius:999px;background:var(--muted);border:1px solid var(--border);
+  overflow:hidden;display:flex;margin-top:4px}
+.alloc-meter i{display:block;height:100%;border-right:1px solid var(--background)}
+.alloc-meter i:nth-child(1){background:var(--foreground)}
+.alloc-meter i:nth-child(2){background:color-mix(in srgb,var(--foreground) 55%,var(--background))}
+.alloc-meter i:nth-child(3){background:color-mix(in srgb,var(--foreground) 30%,var(--background))}
+.alloc-meter i:nth-child(4){background:color-mix(in srgb,var(--foreground) 15%,var(--background))}
+.alloc-state{font-family:var(--font-mono);font-size:12px;margin-top:8px}
+.alloc-state.bad{font-weight:600}
+
+/* ── overlay ───────────────────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;z-index:80;display:none;place-content:center;
+  background:color-mix(in srgb,var(--background) 78%,transparent);backdrop-filter:blur(3px)}
+.overlay.on{display:grid}
+.reading{width:min(420px,90vw);background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px}
+.reading h4{font-size:14px}
+.reading .prog{height:5px;border-radius:999px;background:var(--muted);overflow:hidden;margin:16px 0}
+.reading .prog i{display:block;height:100%;background:var(--foreground);width:0;transition:width .25s linear}
+.stages{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;
+  font-size:12px;font-family:var(--font-mono)}
+.stages li{display:grid;grid-template-columns:16px 1fr;gap:8px;color:var(--subtle-foreground)}
+.stages li .m{text-align:center}
+.stages li.doing{color:var(--foreground)}
+.stages li.done{color:var(--muted-foreground)}
+.spin{display:inline-block;width:9px;height:9px;border:1.6px solid var(--foreground);
+  border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* ── capture ───────────────────────────────────────────────────────── */
+.fixtures{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.fx-card{display:flex;flex-direction:column;text-align:left;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  overflow:hidden;transition:border-color .18s,box-shadow .18s,transform .18s}
+.fx-card:hover{border-color:var(--foreground);box-shadow:var(--shadow);transform:translateY(-1px)}
+.fx-card .thumb{background:var(--muted);border-bottom:1px solid var(--border);
+  padding:12px 12px 0;height:128px;overflow:hidden;display:grid;place-items:start center}
+.fx-card .thumb svg{width:104px;height:auto;box-shadow:0 1px 4px rgb(0 0 0 / .2);border-radius:2px}
+.fx-card .meta{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.fx-card .n{font-size:14px;font-weight:600;line-height:1.3}
+.fx-card .p{font-size:12px;color:var(--muted-foreground);line-height:1.4;flex:1}
+.fx-card .f{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground)}
+.fx-card.used{opacity:.62}
+.drop{border:1px dashed var(--input);border-radius:var(--radius);padding:64px 32px 56px;
+  text-align:center;background:var(--muted);transition:all .18s ease}
+.drop:hover{border-color:var(--subtle-foreground)}
+.drop.over{border-color:var(--foreground);background:var(--card)}
+.drop-icon{width:48px;height:48px;margin:0 auto 20px;border-radius:var(--radius);
+  background:var(--card);border:1px solid var(--border);display:grid;place-content:center;
+  color:var(--muted-foreground);transition:all .18s ease}
+.drop:hover .drop-icon{color:var(--foreground);border-color:var(--subtle-foreground)}
+.drop .big{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-.02em}
+.drop .sm{font-size:14px;color:var(--muted-foreground);margin-top:8px;max-width:48ch;
+  margin-left:auto;margin-right:auto;line-height:1.6}
+.link{text-decoration:underline;text-underline-offset:2px;cursor:pointer;color:var(--foreground)}
+.or{display:flex;align-items:center;gap:20px;color:var(--subtle-foreground);font-size:12px;
+  letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ── payload ───────────────────────────────────────────────────────── */
+pre.payload{margin:0;padding:16px 16px;font-family:var(--font-code);font-size:12px;
+  line-height:1.6;background:var(--muted);border-radius:12px;
+  border:1px solid var(--border);overflow-x:auto;max-height:620px;overflow-y:auto;
+  white-space:pre;tab-size:2}
+
+/* ── dashboard ─────────────────────────────────────────────────────── */
+.dash-top{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:16px}
+@media (max-width:1120px){.dash-top{grid-template-columns:1fr 1fr}}
+@media (max-width:680px){.dash-top{grid-template-columns:1fr}}
+/* the one dominant figure — carried by type size, not by a wash */
+.stat.hero{grid-row:span 2;display:flex;flex-direction:column;justify-content:center;
+  padding:32px;background:var(--card)}
+.stat.hero .v{font-family:var(--font-display);font-size:48px;font-weight:700;
+  letter-spacing:-.035em;line-height:1.05;margin-top:12px}
+.stat.hero .s{font-size:14px;margin-top:16px;max-width:36ch;line-height:1.6}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:16px}
+.stat{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);
+  padding:16px 16px;box-shadow:var(--shadow-sm)}
+.stat .k{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground)}
+.stat .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:24px;
+  font-weight:500;letter-spacing:-.03em;margin-top:4px;line-height:1.1}
+.stat .s{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bars{gap:16px}
+.bar-row{display:grid;grid-template-columns:minmax(130px,1.1fr) minmax(0,2.4fr) 96px;
+  gap:16px;align-items:center;font-size:14px}
+.bar-row .nm{line-height:1.3;font-weight:500}
+.bar-row .nm small{display:block;font-size:12px;font-weight:400;
+  color:var(--muted-foreground);letter-spacing:.01em}
+.bar-track{height:10px;background:var(--muted);border-radius:999px;overflow:hidden}
+.bar-track i{display:block;height:100%;border-radius:999px;
+  background:color-mix(in srgb,var(--foreground) 74%,var(--card))}
+.bar-track i.lead{background:var(--foreground)}
+.bar-track i.hatch{background:var(--subtle-foreground)}
+.bar-row .vv{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:500}
+.status-strip{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.status-strip .s{flex:1;padding:12px 16px;border-right:1px solid var(--border)}
+.status-strip .s:last-child{border-right:0}
+.status-strip .s .n{font-family:var(--font-mono);font-size:20px;font-weight:500}
+.status-strip .s .l{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground);margin-top:4px}
+
+/* ── ask ───────────────────────────────────────────────────────────── */
+.chat{display:flex;flex-direction:column;gap:16px;max-height:460px;overflow-y:auto;padding:4px}
+.msg{max-width:74ch;font-size:14px;line-height:1.55}
+.msg.you{align-self:flex-end;background:var(--primary);color:var(--primary-foreground);
+  border-radius:var(--radius) var(--radius) 3px var(--radius);padding:8px 12px}
+.msg.bot{align-self:flex-start;border:1px solid var(--border);background:var(--card);
+  border-radius:var(--radius) var(--radius) var(--radius) 3px;padding:12px 16px;
+  box-shadow:var(--shadow-sm)}
+.msg.bot .hdr{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground);margin-bottom:8px}
+.msg.bot ul{margin:8px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:4px}
+.msg.bot .cites{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);
+  font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground);
+  display:flex;gap:8px;flex-wrap:wrap}
+.msg.bot .cites b{font-weight:600;color:var(--foreground)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);
+  border-radius:100px;padding:8px 16px;font-size:14px;
+  background:var(--card);color:var(--muted-foreground);transition:all .18s ease}
+.chip:hover{background:var(--accent);color:var(--foreground)}
+.ask-form{display:flex;gap:12px;margin-top:20px}
+
+/* ── limits ────────────────────────────────────────────────────────── */
+.limits{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.limits li{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--border);font-size:14px;line-height:1.5}
+.limits li:last-child{border-bottom:0}
+.limits .t{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;border:1px solid var(--border);border-radius:4px;padding:4px 8px;
+  height:fit-content;white-space:nowrap;color:var(--muted-foreground)}
+.limits b{font-weight:600}
+.audit{width:100%;border-collapse:collapse;font-size:12px}
+.audit th{text-align:left;font-size:12px;letter-spacing:0;
+  font-weight:600;color:var(--muted-foreground);padding:8px 8px;border-bottom:1px solid var(--border)}
+.audit td{padding:8px 8px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px}
+.audit tr:last-child td{border-bottom:0}
+.empty{padding:24px;text-align:center;font-size:12px;color:var(--muted-foreground)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);
+  background:var(--primary);color:var(--primary-foreground);padding:8px 16px;border-radius:999px;
+  font-size:12px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;
+  transition:opacity .18s,transform .18s;z-index:90}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ── additions for the two role apps ──────────────────────────────── */
+
+/* superintendent line list — bigger touch targets than a table */
+.lines{display:flex;flex-direction:column}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 130px 160px;gap:20px;
+  padding:20px 32px;border-bottom:1px solid var(--border);align-items:start;
+  transition:background .18s ease}
+.ln:hover{background:var(--muted)}
+.ln:last-child{border-bottom:0}
+.ln.off{background:var(--muted)}
+.ln.off .orig,.ln.off .gloss{text-decoration:line-through;
+  text-decoration-thickness:1px;color:var(--muted-foreground)}
+.ln-off{font-size:14px;color:var(--muted-foreground);margin-top:8px;
+  padding-left:16px;border-left:1px solid var(--foreground);line-height:1.55}
+.ln-total{display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;background:var(--muted);font-size:16px}
+.ln-total b{font-family:var(--font-display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:720px){
+  .ln{grid-template-columns:1fr 1fr;gap:8px}
+  .ln-main{grid-column:1 / -1}
+}
+
+/* the receipt's own fields, editable on sight — no reveal button */
+.hdr-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;
+  padding:28px 32px;border-bottom:1px solid var(--border)}
+.hf{display:block;min-width:0}
+.hf.wide{grid-column:1 / -1}
+.hf>span{display:block;font-size:14px;color:var(--muted-foreground);margin-bottom:8px}
+@media (max-width:560px){.hdr-fields{grid-template-columns:1fr}}
+
+/* the conversion note under a receipt, with its rate override inline */
+.fx-note{font-size:14px;color:var(--muted-foreground);line-height:1.7;margin:0}
+.lnk{font:inherit;color:var(--foreground);text-decoration:underline;
+  text-underline-offset:2px;padding:0;cursor:pointer;background:none;border:0}
+.lnk:hover{opacity:.7}
+.rate-in{font:inherit;font-variant-numeric:tabular-nums;width:82px;padding:1px 4px;
+  border:1px solid var(--input);border-radius:6px;background:var(--card);
+  color:var(--foreground);text-align:right}
+
+/* summary rows, used on both apps */
+.sum-row{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 32px;border-bottom:1px solid var(--border);font-size:14px}
+.sum-row:last-child{border-bottom:0}
+
+/* the two evidence facts, toggled in place on the document card */
+.att{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:12px;
+  font-weight:500;padding:4px 12px;border-radius:100px;
+  border:1px solid var(--border);background:none;color:var(--muted-foreground);
+  cursor:pointer;white-space:nowrap;transition:all .18s ease}
+.att:hover{border-color:var(--foreground);color:var(--foreground)}
+.att.on{border-style:solid;border-color:var(--primary);background:var(--primary);
+  color:var(--primary-foreground)}
+
+/* selectable chips — the superintendent's vessel tags */
+.chip.lg{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:14px;
+  border-radius:100px;font-weight:500}
+.chip.lg.on{background:var(--primary);color:var(--primary-foreground);
+  border-color:var(--primary)}
+.chip.lg.on:hover{background:var(--primary);color:var(--primary-foreground);opacity:.9}
+
+/* role banner in the sidebar */
+.role{display:flex;align-items:center;gap:12px;padding:0 4px;margin:0}
+.role .ic{width:32px;height:32px;border-radius:100px;flex:none;display:grid;
+  place-content:center;font-size:12px;background:var(--card);
+  border:1px solid var(--border);color:var(--foreground);font-weight:600}
+.role .who{min-width:0}
+.role .who b{display:block;font-size:14px;font-weight:500;line-height:1.3}
+.role .who span{display:block;font-size:12px;color:var(--muted-foreground);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── explicit interaction states ────────────────────────────────────
+   Every interactive control declares hover, press, focus and disabled.
+   Static containers do not — a card that lifts under the cursor but
+   does nothing when clicked is a false affordance. */
+.fx-card:active{transform:scale(.99)}
+.fx-card:disabled{opacity:.4;cursor:not-allowed}
+.chip:active,.chip.lg:active,.att:active{transform:scale(.98)}
+.switch:hover{border-color:var(--subtle-foreground)}
+.switch:active::after{width:20px}
+.stepper button:active .dot{transform:scale(.96)}
+.nav button:active{transform:scale(.99)}
+.lnk:active{opacity:.5}
+.rate-in:hover{border-color:var(--subtle-foreground)}
+.rate-in:focus{outline:none;box-shadow:0 0 0 1px var(--ring)}
+.input:disabled,.select:disabled{opacity:.5;cursor:not-allowed;background:var(--muted)}
+
+/* the receipt cards are the one place a lift is honest: they are the
+   primary action on the capture screen */
+.fx-card:hover{box-shadow:var(--shadow-hover)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">
+        <span class="glyph">SR</span>
+        <h1>Superintendent</h1>
+      </div>
+      <span class="sub">Expense capture</span>
+    </div>
+
+    <div class="role">
+      <span class="ic">DC</span>
+      <span class="who"><b>D. Charalambous</b><span>Senior Technical Superintendent</span></span>
+    </div>
+
+    <div class="side-group">
+      <ul class="nav" id="mainNav"></ul>
+    </div>
+
+    <div class="side-foot">
+      <ul class="nav" id="utilNav"></ul>
+      <button class="btn sm ghost" id="themeBtn" type="button" style="justify-content:flex-start">
+        <span id="themeIcon"></span> <span id="themeLabel">Match system</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="head">
+        <div>
+          <h2 id="paneTitle"></h2>
+          <p class="lede" id="paneLede"></p>
+        </div>
+        <div class="tabs" id="quickTabs"></div>
+      </div>
+      <div class="summary" id="summaryStrip"></div>
+    </div>
+    <section class="pane" id="pane-capture"></section>
+    <section class="pane" id="pane-check"></section>
+    <section class="pane" id="pane-send"></section>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" role="status" aria-live="polite">
+  <div class="reading">
+    <h4 id="readTitle">Reading the receipt</h4>
+    <p class="muted" style="font-size:12.5px;margin-top:4px" id="readSub"></p>
+    <div class="prog"><i id="readBar"></i></div>
+    <ul class="stages" id="readStages"></ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ══ reference data ═════════════════════════════════════════════════ */
+const TODAY = '2026-09-07';
+const BASE  = 'EUR';
+
+const OWNERS = [
+  {id:'OWN-HELIOS', name:'Helios Maritime Ltd',        agreement:'SHIPMAN 2009 — Cl. 8 recharge'},
+  {id:'OWN-NORD',   name:'Nordline Bereederung GmbH',  agreement:'SHIPMAN 2009 — Cl. 8 recharge'}
+];
+const VESSELS = [
+  {id:'V-ATL', name:'MV Atlantic Sentinel', imo:'9483721', type:'Bulk carrier · 63,500 dwt',    owner:'OWN-HELIOS'},
+  {id:'V-KYR', name:'MT Kyrenia Star',      imo:'9612044', type:'Product tanker · 49,900 dwt',  owner:'OWN-HELIOS'},
+  {id:'V-AEG', name:'MV Aegean Trader',     imo:'9330118', type:'Container feeder · 1,730 TEU', owner:'OWN-NORD'}
+];
+const CENTRES = [
+  {id:'CC-LIM', name:'Office — Limassol', type:'Cost centre · overhead', owner:null}
+];
+const CATEGORIES = ['Meals','Alcohol','Accommodation','Ground transport','Air travel',
+  'Communications','Laundry','Supplies','Port and agency fees','Other'];
+
+/* historical FX — fixture table, keyed to the transaction date */
+const FX_TABLE = {
+  'KRW|2026-08-18': 0.0006329,
+  'CNY|2026-08-21': 0.1204,
+  'EUR|2026-08-25': 1
+};
+const FX_SOURCE = 'Static fixture table (ECB daily reference, transaction date)';
+
+/* policy — data, not code */
+const POLICY = [
+  {id:'POL-001', type:'category_exclusion', enabled:true,  category:'Alcohol',
+   title:'Alcohol is not reimbursable',
+   detail:'Any line categorised Alcohol is excluded from the claim total.'},
+  {id:'POL-002', type:'allowed_with_condition', enabled:false, category:'Alcohol',
+   title:'Alcohol reimbursable when entertaining a client',
+   detail:'Overrides POL-001, but only on documents where client entertainment is recorded and attested.'},
+  {id:'POL-003', type:'per_item_cap', enabled:true, category:'Meals', threshold:60,
+   title:'Meals over EUR 60 per head need review',
+   detail:'Line total converted to base currency, divided by the head count on the document.'},
+  {id:'POL-004', type:'daily_cap', enabled:true, category:'Meals', threshold:120,
+   title:'Total meals over EUR 120 per day need review',
+   detail:'Summed across every document in the claim bearing the same transaction date.'},
+  {id:'POL-005', type:'required_evidence', enabled:true, category:'Accommodation', threshold:200,
+   title:'Accommodation over EUR 200 requires an itemised invoice',
+   detail:'Satisfied when an itemised invoice is attested on the document in step 5.'}
+];
+const CONF_FLOOR = 0.60;
+/* ══ receipt facsimile renderer ═════════════════════════════════════
+   Synthetic demo documents. Drawn as SVG so the file stays standalone —
+   no external images, nothing to fetch. Always dark ink on white paper,
+   because this stands in for a photograph of paper. */
+const CJK_FACE = "Malgun Gothic, Microsoft YaHei, Noto Sans CJK KR, Apple SD Gothic Neo, sans-serif";
+const MONO_FACE = "Consolas, Courier New, monospace";
+const HAND_FACE = "Segoe Script, Ink Free, Bradley Hand, cursive";
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function receiptSvg(spec){
+  const W = 300, L = 20, R = W - 20, MID = W / 2;
+  const face = spec.face || MONO_FACE;
+  const ink = '#141414';
+  let y = 0;
+  const el = [];
+  const txt = (x, s, o) => {
+    o = o || {};
+    el.push('<text x="' + x + '" y="' + y + '" font-family="' + (o.face || face) + '"'
+      + ' font-size="' + (o.size || 8.6) + '" font-weight="' + (o.w || 400) + '"'
+      + ' text-anchor="' + (o.anchor || 'start') + '" fill="' + ink + '"'
+      + ' opacity="' + (o.op || 1) + '"' + (o.extra || '') + '>' + esc(s) + '</text>');
+  };
+  const rule = (dash) => {
+    el.push('<line x1="' + L + '" y1="' + y + '" x2="' + R + '" y2="' + y + '"'
+      + ' stroke="' + ink + '" stroke-width="0.7" opacity="0.5"'
+      + (dash ? ' stroke-dasharray="2 2"' : '') + '/>');
+  };
+
+  y = 26;
+  (spec.head || []).forEach((h, i) => {
+    txt(MID, h.t, {anchor:'middle', size:h.size || (i === 0 ? 11 : 8.4),
+      w:h.w || (i === 0 ? 600 : 400), face:h.face || (spec.headFace || face), op:h.op});
+    y += (h.gap || (i === 0 ? 14 : 11));
+  });
+
+  y += 3; rule(); y += 12;
+  (spec.info || []).forEach(r => {
+    txt(L, r[0], {size:7.8, op:.82}); txt(R, r[1], {size:7.8, anchor:'end', op:.82}); y += 10;
+  });
+
+  y += 2; rule(true); y += 13;
+  (spec.items || []).forEach(it => {
+    txt(L, it.d, {size:it.size || 8.6, face:it.face || spec.itemFace || face, w:it.w || 400, op:it.op});
+    txt(R, it.a, {size:8.6, anchor:'end', op:it.op});
+    y += 11;
+    if (it.sub){ txt(L + 8, it.sub, {size:7.4, op:(it.op || 1) * .72}); y += 10; }
+  });
+
+  y += 3; rule(true); y += 13;
+  (spec.totals || []).forEach(t => {
+    txt(L, t[0], {size:t[2] ? 9.6 : 8.4, w:t[2] ? 600 : 400, op:t[3] || 1});
+    txt(R, t[1], {size:t[2] ? 9.6 : 8.4, w:t[2] ? 600 : 400, anchor:'end', op:t[3] || 1});
+    y += t[2] ? 14 : 11;
+  });
+
+  y += 4; rule(); y += 13;
+  (spec.foot || []).forEach(f => {
+    txt(MID, f, {size:7.4, anchor:'middle', op:.62}); y += 10;
+  });
+
+  const H = y + 12;
+  const paper = '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#fdfdfc"/>'
+    + '<rect x="0.5" y="0.5" width="' + (W - 1) + '" height="' + (H - 1) + '" fill="none"'
+    + ' stroke="#141414" stroke-opacity="0.12"/>';
+  const grain = spec.aged
+    ? '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#141414" opacity="0.035"/>'
+    : '';
+  const tilt = spec.tilt ? ' transform="rotate(' + spec.tilt + ' ' + (W / 2) + ' ' + (H / 2) + ')"' : '';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="'
+    + esc(spec.alt || 'Receipt facsimile') + '" xmlns="http://www.w3.org/2000/svg">'
+    + paper + '<g' + tilt + '>' + el.join('') + '</g>' + grain + '</svg>';
+}
+/* ══ fixtures ═══════════════════════════════════════════════════════
+   Four synthetic receipts and the extraction each one yields. In a wired
+   build `ext` would be the model's response; here it is pre-recorded, so
+   the demo never depends on a network call in a meeting room. */
+function L(orig, gloss, qty, unit, total, cat, taxRate, conf){
+  return {orig:orig, gloss:gloss, qty:qty, unit:unit, total:total,
+          cat:cat, taxRate:taxRate, conf:conf || {}};
+}
+
+const FIXTURES = [];
+
+FIXTURES.push({
+  id:'RCP-01', label:'Restaurant — Busan', script:'Korean (ko-KR)', currency:'KRW',
+  purpose:'Non-Latin script, line-item extraction, and the alcohol exclusion',
+  doc:{
+    alt:'Korean restaurant receipt from Busan, printed in Hangul',
+    headFace:CJK_FACE, itemFace:CJK_FACE,
+    head:[{t:'해운대 소갈비'},{t:'HAEUNDAE SO-GALBI · 본점', size:7.6, face:MONO_FACE}],
+    info:[['사업자 617-81-04204','TABLE 7'],['부산 해운대구 구남로 21','2인'],
+          ['2026-08-18','20:41'],['영수증 A-20268','POS 02']],
+    items:[
+      {d:'한우 정식 코스', a:'220,000', sub:'2 x 110,000'},
+      {d:'참이슬 후레쉬 360ml', a:'10,000', sub:'2 x 5,000'},
+      {d:'카스 생맥주 500cc', a:'14,000', sub:'2 x 7,000'},
+      {d:'공기밥', a:'4,000', sub:'2 x 2,000'}],
+    totals:[['과세물품가액','225,455'],['부가세 10%','22,545'],['합계 KRW','248,000',true]],
+    foot:['카드결제  신한 ****4471','감사합니다']
+  },
+  ext:{
+    merchant:['해운대 소갈비 (Haeundae So-Galbi)', .96],
+    address:['부산 해운대구 구남로 21, Busan', .91],
+    country:['Korea, Republic of', .97],
+    docNo:['A-20268', .93],
+    date:['2026-08-18', .97], time:['20:41', .93],
+    currency:['KRW', .99], heads:[2, .86],
+    taxInclusive:true, itemisedInvoice:true,
+    clientEntertainment:true,
+    entertainmentNote:'Dae Sung HI yard superintendent and owner’s representative present — docking spec review',
+    docTotal:[248000, .98],
+    alloc:[{target:'V-ATL', share:60},{target:'V-KYR', share:40}],
+    allocReason:'Yard dinner covered the Atlantic Sentinel docking in progress and the Kyrenia Star docking spec quoted by the same yard.',
+    lines:[
+      L('한우 정식 코스','Hanwoo beef set course', 2, 110000, 220000, 'Meals', 10, {orig:.97,total:.96}),
+      L('참이슬 후레쉬 360ml','Chamisul Fresh soju, 360ml', 2, 5000, 10000, 'Alcohol', 10, {orig:.94,total:.95}),
+      L('카스 생맥주 500cc','Cass draught beer, 500cc', 2, 7000, 14000, 'Alcohol', 10, {orig:.92,total:.94}),
+      L('공기밥','Steamed rice', 2, 2000, 4000, 'Meals', 10, {orig:.97,total:.97})
+    ]
+  }
+});
+
+FIXTURES.push({
+  id:'RCP-02', label:'Hotel folio — Shanghai', script:'Chinese (zh-CN)', currency:'CNY',
+  purpose:'One document spanning four categories with mixed policy outcomes',
+  doc:{
+    alt:'Chinese hotel folio from Shanghai, printed in simplified Chinese',
+    headFace:CJK_FACE, itemFace:CJK_FACE,
+    head:[{t:'上海浦东嘉里大酒店'},
+          {t:'KERRY HOTEL PUDONG · GUEST FOLIO', size:7.4, face:MONO_FACE}],
+    info:[['房号 ROOM','1812'],['花木路1388号 浦东新区','GUEST 1'],
+          ['入住 2026-08-18','退房 2026-08-21'],['账单号','FOL-88214']],
+    items:[
+      {d:'客房费 3晚', a:'2,340.00', sub:'3 x 780.00'},
+      {d:'迷你吧 青岛啤酒', a:'90.00', sub:'2 x 45.00'},
+      {d:'洗衣服务', a:'120.00'},
+      {d:'商务中心 打印', a:'35.00'},
+      {d:'早餐 3份', a:'264.00', sub:'3 x 88.00'}],
+    totals:[['小计','2,687.74'],['增值税 6%','161.26'],['应付总额 CNY','2,849.00',true]],
+    foot:['增值税专用发票已开具','客人签名  D. CHARALAMBOUS']
+  },
+  ext:{
+    merchant:['上海浦东嘉里大酒店 (Kerry Hotel Pudong)', .95],
+    address:['花木路1388号, 浦东新区, Shanghai', .9],
+    country:['China', .98],
+    docNo:['FOL-88214', .96],
+    date:['2026-08-21', .95], time:['11:04', .82],
+    currency:['CNY', .99], heads:[1, .9],
+    taxInclusive:true, itemisedInvoice:true,
+    clientEntertainment:false, entertainmentNote:'',
+    docTotal:[2849, .97],
+    alloc:[{target:'V-KYR', share:100}],
+    allocReason:'Whole stay attributable to the Kyrenia Star drydock at Hudong-Zhonghua.',
+    lines:[
+      L('客房费 3晚','Room charge, 3 nights', 3, 780, 2340, 'Accommodation', 6, {orig:.95,total:.96}),
+      L('迷你吧 青岛啤酒','Minibar — Tsingtao beer', 2, 45, 90, 'Alcohol', 6, {orig:.88,total:.9}),
+      L('洗衣服务','Laundry service', 1, 120, 120, 'Laundry', 6, {orig:.94,total:.95}),
+      L('商务中心 打印','Business centre — printing', 1, 35, 35, 'Supplies', 6, {orig:.9,total:.93}),
+      L('早餐 3份','Breakfast, 3 servings', 3, 88, 264, 'Meals', 6, {orig:.92,total:.94})
+    ]
+  }
+});
+FIXTURES.push({
+  id:'RCP-03', label:'Taverna — Piraeus', script:'Greek (el-GR)', currency:'EUR',
+  purpose:'VAT itemised at two rates — the recoverable-VAT figure',
+  doc:{
+    alt:'Greek taverna receipt from Piraeus with itemised VAT',
+    head:[{t:'Ο ΜΙΚΡΟΛΙΜΑΝΟΣ'},
+          {t:'ΤΑΒΕΡΝΑ · ΑΚΤΗ ΚΟΥΜΟΥΝΔΟΥΡΟΥ 48', size:7.2},
+          {t:'ΠΕΙΡΑΙΑΣ 185 33', size:7.2}],
+    info:[['ΑΦΜ 099384712','ΔΟΥ ΠΕΙΡΑΙΑ'],['ΑΠΟΔΕΙΞΗ','4471'],
+          ['2026-08-25','13:22'],['ΑΤΟΜΑ','1']],
+    items:[
+      {d:'ΧΩΡΙΑΤΙΚΗ ΣΑΛΑΤΑ      Α', a:'9.50'},
+      {d:'ΨΗΤΟ ΞΙΦΙΑΣ           Α', a:'22.00'},
+      {d:'ΠΑΤΑΤΕΣ ΤΗΓΑΝΗΤΕΣ     Α', a:'5.00'},
+      {d:'ΚΡΑΣΙ ΧΥΜΑ 500ML      Β', a:'8.00'},
+      {d:'ΝΕΡΟ 1L               Α', a:'1.50'},
+      {d:'ΚΑΦΕΣ ΕΛΛΗΝΙΚΟΣ  x2   Β', a:'5.00'}],
+    totals:[['ΚΑΘΑΡΗ ΑΞΙΑ  Α 13%','33.63'],['ΦΠΑ 13%','4.37'],
+            ['ΚΑΘΑΡΗ ΑΞΙΑ  Β 24%','10.48'],['ΦΠΑ 24%','2.52'],
+            ['ΣΥΝΟΛΟ EUR','51.00',true]],
+    foot:['ΦΠΑ ΣΥΝΟΛΟ 6.89','ΕΥΧΑΡΙΣΤΟΥΜΕ']
+  },
+  ext:{
+    merchant:['Ταβέρνα Ο Μικρολίμανος', .97],
+    address:['Ακτή Κουμουνδούρου 48, Πειραιάς 185 33', .94],
+    country:['Greece', .99],
+    docNo:['4471', .96],
+    date:['2026-08-25', .97], time:['13:22', .95],
+    currency:['EUR', .99], heads:[1, .93],
+    taxInclusive:true, itemisedInvoice:true,
+    clientEntertainment:false, entertainmentNote:'',
+    docTotal:[51, .98],
+    alloc:[{target:'V-AEG', share:100}],
+    allocReason:'Lunch during the Aegean Trader crew handover at Piraeus.',
+    lines:[
+      L('ΧΩΡΙΑΤΙΚΗ ΣΑΛΑΤΑ','Village salad', 1, 9.5, 9.5, 'Meals', 13, {orig:.97,total:.98}),
+      L('ΨΗΤΟ ΞΙΦΙΑΣ','Grilled swordfish', 1, 22, 22, 'Meals', 13, {orig:.96,total:.98}),
+      L('ΠΑΤΑΤΕΣ ΤΗΓΑΝΗΤΕΣ','Fried potatoes', 1, 5, 5, 'Meals', 13, {orig:.97,total:.98}),
+      L('ΚΡΑΣΙ ΧΥΜΑ 500ML','House wine, 500ml', 1, 8, 8, 'Alcohol', 24, {orig:.95,total:.97}),
+      L('ΝΕΡΟ 1L','Water, 1L', 1, 1.5, 1.5, 'Meals', 13, {orig:.98,total:.98}),
+      L('ΚΑΦΕΣ ΕΛΛΗΝΙΚΟΣ','Greek coffee', 2, 2.5, 5, 'Meals', 24, {orig:.94,total:.96})
+    ]
+  }
+});
+
+FIXTURES.push({
+  id:'RCP-04', label:'Taxi, handwritten — Piraeus', script:'Greek (el-GR), handwritten',
+  currency:'EUR',
+  purpose:'Low-confidence extraction and the human-correction path',
+  doc:{
+    alt:'Faded handwritten Greek taxi receipt',
+    aged:true, tilt:-1.4, face:HAND_FACE, headFace:HAND_FACE, itemFace:HAND_FACE,
+    head:[{t:'ΤΑΞΙ ΠΕΙΡΑΙΑ', size:13, op:.8},
+          {t:'ΑΡ. ΑΔΕΙΑΣ  ΠΕ—4?81', size:9, op:.55}],
+    info:[['ΗΜ/ΝΙΑ  25/08/2?','—']],
+    items:[
+      {d:'ΚΟΜΙΣΤΡΟ ΠΕΙΡΑΙΑΣ—ΑΕΡΟΔΡ.', a:'34,00', size:10, op:.62},
+      {d:'ΔΙΟΔΙΑ', a:'2,80', size:10, op:.7}],
+    totals:[['ΣΥΝΟΛΟ','36,80',true,.68]],
+    foot:['(υπογραφή)']
+  },
+  ext:{
+    merchant:['ΤΑΞΙ ΠΕΙΡΑΙΑ (licence ΠΕ-4?81 — partly illegible)', .38],
+    address:['Πειραιάς, Greece', .55],
+    country:['Greece', .9],
+    docNo:['— none printed —', .3],
+    date:['2026-08-25', .52], time:['', .2],
+    currency:['EUR', .95], heads:[1, .6],
+    taxInclusive:true, itemisedInvoice:false,
+    clientEntertainment:false, entertainmentNote:'',
+    docTotal:[86.8, .41],
+    alloc:[{target:'V-AEG', share:70},{target:'CC-LIM', share:30}],
+    allocReason:'Airport transfer at the end of the Piraeus leg; 30% carried by the Limassol office as return-travel overhead.',
+    lines:[
+      L('ΚΟΜΙΣΤΡΟ ΠΕΙΡΑΙΑΣ—ΑΕΡΟΔΡ.','Fare, Piraeus to airport', 1, 84, 84,
+        'Ground transport', 0, {orig:.58,total:.41}),
+      L('ΔΙΟΔΙΑ','Tolls', 1, 2.8, 2.8, 'Ground transport', 0, {orig:.62,total:.55})
+    ],
+    lowConfNote:'Handwritten comma decimals and a smudged total. The document reads 34,00 — the extraction proposed 84.00. Correct it in step 5 and both values are kept.'
+  }
+});
+</script>
+<script>
+/* ══ helpers ════════════════════════════════════════════════════════ */
+const DP = {KRW:0, JPY:0};
+function dp(cur){ return DP[cur] === undefined ? 2 : DP[cur]; }
+function money(n, cur){
+  const d = dp(cur);
+  return (Number(n) || 0).toLocaleString('en-GB', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function eur(n){ return money(n, BASE); }
+function F(pair){
+  const v = Array.isArray(pair) ? pair[0] : pair;
+  const c = Array.isArray(pair) ? (pair[1] === undefined ? .99 : pair[1]) : .99;
+  return {ai:v, value:v, conf:c, edited:false};
+}
+function setField(f, v){
+  if (String(f.value) === String(v)) return false;
+  f.value = v;
+  f.edited = String(v) !== String(f.ai);
+  return true;
+}
+function targetById(id){
+  return VESSELS.find(v => v.id === id) || CENTRES.find(c => c.id === id) || null;
+}
+function ownerOfTarget(id){
+  const v = VESSELS.find(x => x.id === id);
+  return v ? OWNERS.find(o => o.id === v.owner) : null;
+}
+function ruleById(id){ return state.policy.find(r => r.id === id); }
+function fxFor(receipt){
+  if (receipt.fxOverride){
+    return {rate:Number(receipt.fxOverride.rate), date:receipt.fxOverride.date,
+            source:'Manual override — card settlement rate', overridden:true};
+  }
+  const cur = receipt.currency.value, d = receipt.date.value;
+  if (cur === BASE) return {rate:1, date:d, source:'Base currency — no conversion applied', overridden:false};
+  const hit = FX_TABLE[cur + '|' + d];
+  if (hit) return {rate:hit, date:d, source:FX_SOURCE, overridden:false};
+  const fallback = Object.keys(FX_TABLE).find(k => k.indexOf(cur + '|') === 0);
+  return fallback
+    ? {rate:FX_TABLE[fallback], date:fallback.split('|')[1], source:FX_SOURCE + ' — nearest available date', overridden:false}
+    : {rate:null, date:null, source:'No fixture rate held for ' + cur + ' on ' + d, overridden:false};
+}
+function daysSince(iso){
+  return Math.round((Date.parse(TODAY) - Date.parse(iso)) / 86400000);
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._h); toast._h = setTimeout(() => t.classList.remove('on'), 2200);
+}
+function logAudit(receiptId, field, from, to){
+  state.audit.push({receipt:receiptId, field:field, from:from, to:to,
+    at:new Date().toISOString().slice(11,19) + ' local'});
+}
+
+/* build a live receipt from a fixture's recorded extraction */
+function instantiate(fx){
+  const e = fx.ext;
+  return {
+    id:fx.id, fixture:fx.id, label:fx.label, script:fx.script, purpose:fx.purpose,
+    merchant:F(e.merchant), address:F(e.address), country:F(e.country), docNo:F(e.docNo),
+    date:F(e.date), time:F(e.time), currency:F(e.currency), heads:F(e.heads),
+    docTotal:F(e.docTotal),
+    taxInclusive:e.taxInclusive, itemisedInvoice:e.itemisedInvoice,
+    clientEntertainment:e.clientEntertainment, entertainmentNote:e.entertainmentNote || '',
+    allocReason:e.allocReason || '', lowConfNote:e.lowConfNote || '',
+    confirmed:false,
+    fxOverride:null,
+    alloc:e.alloc.map(a => Object.assign({}, a)),
+    lines:e.lines.map((l, i) => ({
+      id:fx.id + '-L' + (i + 1),
+      orig:F([l.orig, l.conf.orig]), gloss:F([l.gloss, l.conf.gloss === undefined ? (l.conf.orig || .95) : l.conf.gloss]),
+      qty:F([l.qty, l.conf.qty === undefined ? .95 : l.conf.qty]),
+      unit:F([l.unit, l.conf.unit === undefined ? (l.conf.total || .95) : l.conf.unit]),
+      total:F([l.total, l.conf.total]),
+      cat:F([l.cat, l.conf.cat === undefined ? .93 : l.conf.cat]),
+      taxRate:F([l.taxRate, .95]),
+      note:'', alloc:null
+    }))
+  };
+}
+/* ══ policy engine ══════════════════════════════════════════════════
+   Rules are read from state.policy at evaluation time, so toggling one
+   recomputes every claim total without touching this function. */
+function evaluateClaim(){
+  const rs = state.claim.receipts;
+
+  /* claim-wide meal totals per transaction date, for the daily cap */
+  const mealsByDate = {};
+  rs.forEach(r => {
+    const fx = fxFor(r);
+    if (fx.rate === null) return;
+    r.lines.forEach(l => {
+      if (l.cat.value !== 'Meals') return;
+      const d = r.date.value;
+      mealsByDate[d] = (mealsByDate[d] || 0) + Number(l.total.value) * fx.rate;
+    });
+  });
+
+  rs.forEach(r => {
+    const fx = fxFor(r);
+    r._fx = fx;
+    r.lines.forEach(l => {
+      const base = fx.rate === null ? 0 : Number(l.total.value) * fx.rate;
+      const rules = [];
+      let status = 'reimbursable';
+      const flag = eff => { if (status !== 'excluded') status = eff; };
+
+      if (l.cat.value === 'Alcohol'){
+        const p1 = ruleById('POL-001'), p2 = ruleById('POL-002');
+        if (p1.enabled){
+          if (p2.enabled && r.clientEntertainment){
+            rules.push({id:'POL-002', effect:'allowed',
+              detail:'Client entertainment attested on this document — POL-001 overridden'});
+          } else {
+            status = 'excluded';
+            rules.push({id:'POL-001', effect:'excluded',
+              detail:p2.enabled
+                ? 'Client entertainment is not attested on this document, so the exception does not apply'
+                : 'Alcohol is not reimbursable under the active policy set'});
+          }
+        }
+      }
+
+      if (l.cat.value === 'Meals'){
+        const p3 = ruleById('POL-003');
+        const heads = Math.max(1, Number(r.heads.value) || 1);
+        if (p3.enabled && base / heads > p3.threshold){
+          flag('review');
+          rules.push({id:'POL-003', effect:'review',
+            detail:'EUR ' + eur(base / heads) + ' per head across ' + heads
+              + ' — cap is EUR ' + p3.threshold});
+        }
+        const p4 = ruleById('POL-004');
+        const dayTotal = mealsByDate[r.date.value] || 0;
+        if (p4.enabled && dayTotal > p4.threshold){
+          flag('review');
+          rules.push({id:'POL-004', effect:'review',
+            detail:'EUR ' + eur(dayTotal) + ' of meals claimed on ' + r.date.value
+              + ' — cap is EUR ' + p4.threshold});
+        }
+      }
+
+      if (l.cat.value === 'Accommodation'){
+        const p5 = ruleById('POL-005');
+        if (p5.enabled && base > p5.threshold){
+          if (r.itemisedInvoice){
+            rules.push({id:'POL-005', effect:'satisfied',
+              detail:'Itemised invoice attested — evidence requirement met'});
+          } else {
+            flag('review');
+            rules.push({id:'POL-005', effect:'review',
+              detail:'EUR ' + eur(base) + ' exceeds EUR ' + p5.threshold
+                + ' and no itemised invoice is attested'});
+          }
+        }
+      }
+
+      const minConf = Math.min(l.total.conf, l.orig.conf, l.qty.conf);
+      const humanFixed = l.total.edited || l.orig.edited || l.qty.edited;
+      if (minConf < CONF_FLOOR && !humanFixed){
+        flag('review');
+        rules.push({id:'SYS-CONF', effect:'review',
+          detail:'Extraction confidence ' + Math.round(minConf * 100)
+            + '% is below the ' + Math.round(CONF_FLOOR * 100) + '% floor — needs human confirmation'});
+      }
+
+      l._base = base;
+      l._status = status;
+      l._rules = rules;
+      l._tax = Number(l.taxRate.value) > 0
+        ? base * Number(l.taxRate.value) / (100 + Number(l.taxRate.value)) : 0;
+      l._taxOrig = Number(l.taxRate.value) > 0
+        ? Number(l.total.value) * Number(l.taxRate.value) / (100 + Number(l.taxRate.value)) : 0;
+      l._minConf = minConf;
+    });
+  });
+}
+
+function receiptTotals(r){
+  let gross = 0, excluded = 0, vat = 0, review = 0;
+  r.lines.forEach(l => {
+    gross += l._base;
+    if (l._status === 'excluded') excluded += l._base;
+    else { vat += l._tax; if (l._status === 'review') review += l._base; }
+  });
+  return {gross:gross, excluded:excluded, reimbursable:gross - excluded, vat:vat, review:review};
+}
+
+function claimTotals(){
+  const t = {gross:0, excluded:0, reimbursable:0, vat:0, review:0, byTarget:{}, byOwner:{}};
+  state.claim.receipts.forEach(r => {
+    const rt = receiptTotals(r);
+    t.gross += rt.gross; t.excluded += rt.excluded;
+    t.reimbursable += rt.reimbursable; t.vat += rt.vat; t.review += rt.review;
+    r.lines.forEach(l => {
+      if (l._status === 'excluded') return;
+      allocFor(r, l).forEach(a => {
+        const amt = l._base * (Number(a.share) || 0) / 100;
+        t.byTarget[a.target] = (t.byTarget[a.target] || 0) + amt;
+        const o = ownerOfTarget(a.target);
+        const key = o ? o.id : 'CC';
+        t.byOwner[key] = (t.byOwner[key] || 0) + amt;
+      });
+    });
+  });
+  return t;
+}
+
+function allocFor(r, l){ return (l.alloc && l.alloc.length) ? l.alloc : r.alloc; }
+function allocSum(a){ return a.reduce((s, x) => s + (Number(x.share) || 0), 0); }
+function allocValid(a){
+  return a.length > 0 && a.every(x => x.target) && Math.abs(allocSum(a) - 100) < 0.01;
+}
+function receiptAllocValid(r){
+  if (!allocValid(r.alloc)) return false;
+  return r.lines.every(l => !l.alloc || !l.alloc.length || allocValid(l.alloc));
+}
+function ruleBite(id){
+  let lines = 0, amount = 0, met = 0;
+  state.claim.receipts.forEach(r => r.lines.forEach(l => {
+    (l._rules || []).forEach(x => {
+      if (x.id !== id) return;
+      if (x.effect === 'excluded' || x.effect === 'review'){ lines++; amount += l._base; }
+      else met++;
+    });
+  }));
+  return {lines:lines, amount:amount, met:met};
+}
+/* ══ review — shared field widgets ══════════════════════════════════ */
+function confBar(conf){
+  const pct = Math.round(conf * 100);
+  return '<span class="conf ' + (conf < CONF_FLOOR ? 'low' : '') + '" title="Extraction confidence">'
+    + '<span class="bar"><i style="width:' + pct + '%"></i></span>' + pct + '%</span>';
+}
+function editedNote(f, cur){
+  if (!f.edited) return '';
+  const a = cur ? money(f.ai, cur) : esc(String(f.ai));
+  const v = cur ? money(f.value, cur) : esc(String(f.value));
+  return '<span class="edited"><span class="badge outline" style="padding:0 6px">edited</span>'
+    + 'AI read <s>' + a + '</s> → <b style="font-weight:600">' + v + '</b></span>';
+}
+function fieldInput(rid, path, f, o){
+  o = o || {};
+  return '<input class="input sm ' + (o.mono ? 'mono' : '') + '"'
+    + (o.type ? ' type="' + o.type + '"' : '')
+    + (o.step ? ' step="' + o.step + '"' : '')
+    + ' data-edit="' + path + '" data-rcp="' + rid + '"'
+    + (o.lid ? ' data-line="' + o.lid + '"' : '')
+    + ' value="' + esc(String(f.value)) + '"'
+    + (o.style ? ' style="' + o.style + '"' : '') + '>';
+}
+function catSelect(rid, lid, f){
+  return '<select class="select sm" data-edit="cat" data-rcp="' + rid + '" data-line="' + lid + '">'
+    + CATEGORIES.map(c => '<option ' + (c === f.value ? 'selected' : '') + '>' + c + '</option>').join('')
+    + '</select>';
+}
+function statusBadge(st){
+  if (st === 'excluded') return '<span class="badge solid">Excluded</span>';
+  if (st === 'review')   return '<span class="badge striped">Needs review</span>';
+  return '<span class="badge outline dot">Reimbursable</span>';
+}
+
+/* ══ the reading sequence ═══════════════════════════════════════════ */
+function runReading(fixture, fast, done){
+  const stages = [
+    'Reading document image',
+    'Detecting language — ' + fixture.script,
+    'Extracting line items',
+    'Translating to English',
+    'Normalising categories',
+    'Applying policy set'
+  ];
+  const ov = document.getElementById('overlay');
+  const ul = document.getElementById('readStages');
+  const bar = document.getElementById('readBar');
+  document.getElementById('readTitle').textContent = 'AI is reading ' + fixture.id;
+  document.getElementById('readSub').textContent = fixture.label + ' · ' + fixture.currency;
+  ov.classList.add('on');
+  let i = 0;
+  const step = () => {
+    ul.innerHTML = stages.map((s, k) =>
+      '<li class="' + (k < i ? 'done' : k === i ? 'doing' : '') + '">'
+      + '<span class="m">' + (k < i ? '✓' : k === i ? '<span class="spin"></span>' : '·') + '</span>'
+      + '<span>' + s + '</span></li>').join('');
+    bar.style.width = Math.round(i / stages.length * 100) + '%';
+    i++;
+    if (i <= stages.length) setTimeout(step, fast ? 130 : 330);
+    else {
+      bar.style.width = '100%';
+      setTimeout(() => { ov.classList.remove('on'); done(); }, fast ? 90 : 220);
+    }
+  };
+  step();
+}
+
+function capture(fixtureId, fast, then){
+  const fx = FIXTURES.find(f => f.id === fixtureId);
+  if (!fx) return;
+  if (state.claim.receipts.some(r => r.id === fx.id)){
+    state.activeReceipt = fx.id;
+    afterCapture();
+    return;
+  }
+  runReading(fx, fast, () => {
+    state.claim.receipts.push(instantiate(fx));
+    state.claim.receipts.sort((a, b) => a.id.localeCompare(b.id));
+    state.activeReceipt = fx.id;
+    if (then) then();
+    else { afterCapture(); toast(fx.id + ' read — ' + fx.ext.lines.length + ' line items'); }
+  });
+}
+function captureAll(){
+  const pending = FIXTURES.map(f => f.id).filter(id => !state.claim.receipts.some(r => r.id === id));
+  if (!pending.length){ state.activeReceipt = FIXTURES[0].id; afterCapture(); return; }
+  const next = () => {
+    const id = pending.shift();
+    if (!id){
+      state.activeReceipt = FIXTURES[0].id;
+      afterCapture();
+      toast('All four documents read');
+      return;
+    }
+    capture(id, true, next);
+  };
+  next();
+}
+
+/* ══ mutation helpers ═══════════════════════════════════════════════ */
+function receipt(id){ return state.claim.receipts.find(r => r.id === id); }
+function lineOf(r, lid){ return r.lines.find(l => l.id === lid); }
+function scopeOf(rid, lid){
+  const r = receipt(rid);
+  if (!r) return null;
+  if (!lid) return {r:r, list:r.alloc, amt:receiptTotals(r).reimbursable};
+  const l = lineOf(r, lid);
+  if (!l.alloc) l.alloc = [];
+  return {r:r, l:l, list:l.alloc, amt:l._base};
+}
+function balance(list){
+  if (!list.length) return;
+  const rest = list.slice(0, -1).reduce((s, x) => s + (Number(x.share) || 0), 0);
+  list[list.length - 1].share = Math.round((100 - rest) * 10) / 10;
+}
+function unusedTarget(list){
+  const all = VESSELS.map(v => v.id).concat(CENTRES.map(c => c.id));
+  return all.find(id => !list.some(a => a.target === id)) || all[0];
+}
+
+/* ══ icons ══════════════════════════════════════════════════════════
+   Lucide-style line icons, inlined. 24px viewBox, 1.5px stroke,
+   currentColor, rounded caps. No glyphs, no emoji, no icon font. */
+const ICONS = {
+  receipt:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h4"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  split:'<path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.17-2.83L3 3"/><path d="M21 3l-7.83 7.87A4 4 0 0 0 12 13.7v.3"/>',
+  ledger:'<path d="M17 12H3"/><path d="m11 18 6-6-6-6"/><path d="M21 5v14"/>',
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  ask:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+  ship:'<path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.4 12 22 14l-2 5"/><path d="M4.6 12 2 14l2 5"/><path d="M12 2v3"/><path d="M4.6 12h14.8L12 5Z"/>'
+};
+function icon(name, size){
+  const p = ICONS[name];
+  if (!p) return '';
+  const s = size || 18;
+  return '<svg class="ic" viewBox="0 0 24 24" width="' + s + '" height="' + s + '"'
+    + ' fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"'
+    + ' stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+}
+</script>
+<script>
+/* ══ Superintendent app ═════════════════════════════════════════════
+   One job: photograph the receipts, check what was read off them, say
+   which vessel you were attending, send it in. No policy switches, no
+   percentages, no VAT recovery, no export — those are finance's, and
+   putting them here is what made the earlier build feel heavy. */
+
+const state = {
+  view:'capture',
+  policy:POLICY.map(r => Object.assign({}, r)),   /* read-only here */
+  claim:{
+    id:'CLM-2026-0184', status:'draft',
+    title:'Busan · Shanghai · Piraeus — attendance trip',
+    traveller:'D. Charalambous', role:'Senior Technical Superintendent',
+    period:'17–25 Aug 2026', submittedOn:null,
+    legs:[['17–19 Aug','Busan (KR)'],['19–22 Aug','Shanghai (CN)'],['24–25 Aug','Piraeus (GR)']],
+    receipts:[]
+  },
+  history:[],
+  audit:[],
+  activeReceipt:null
+};
+
+const STEPS = [
+  {n:1, label:'Receipts', view:'capture'},
+  {n:2, label:'Check',    view:'check'},
+  {n:3, label:'Send',     view:'send'}
+];
+const NAV = [
+  {id:'capture', label:'Receipts', glyph:'receipt'},
+  {id:'check',   label:'Check',    glyph:'check', needsDoc:true},
+  {id:'send',    label:'Send in',  glyph:'send', needsDoc:true}
+];
+const PANE_COPY = {
+  capture:['Your receipts', 'Photograph them as you go. Four samples are loaded for the demo.'],
+  check:['Check what was read', 'Fix anything wrong, then say which vessel you were attending.'],
+  send:['Send to finance', 'One last look before it goes to the Limassol office.']
+};
+
+/* the superintendent tags vessels; finance sets the percentages */
+function tagsOf(r){
+  if (!r.tags) r.tags = r.alloc.map(a => a.target);
+  return r.tags;
+}
+function toggleTag(r, id){
+  const t = tagsOf(r);
+  const i = t.indexOf(id);
+  if (i >= 0) t.splice(i, 1); else t.push(id);
+}
+function readyToSend(){
+  const rs = state.claim.receipts;
+  return rs.length > 0 && rs.every(r => r.confirmed && tagsOf(r).length > 0);
+}
+function afterCapture(){ go('check'); }
+
+/* ── chrome ──────────────────────────────────────────────────────── */
+function currentStep(){
+  return state.view === 'capture' ? 1 : state.view === 'check' ? 2 : 3;
+}
+function stepDone(n){
+  const rs = state.claim.receipts;
+  if (n === 1) return rs.length > 0;
+  if (n === 2) return readyToSend();
+  return state.claim.status !== 'draft';
+}
+function stepper(){
+  return '<ol class="stepper">' + STEPS.map(s => {
+    const on = currentStep() === s.n;
+    return '<li class="' + (on ? 'on ' : '') + (stepDone(s.n) ? 'done' : '') + '">'
+      + '<button type="button" data-view="' + s.view + '">'
+      + '<span class="dot">' + (stepDone(s.n) && !on ? icon('check',15) : s.n) + '</span>'
+      + '<span class="lb">' + s.label + '</span></button></li>';
+  }).join('') + '</ol>';
+}
+
+function renderChrome(){
+  const c = state.claim, hasDoc = c.receipts.length > 0;
+
+  document.getElementById('mainNav').innerHTML =
+    NAV.filter(v => !v.needsDoc || hasDoc).map(v =>
+      '<li class="' + (state.view === v.id ? 'on' : '') + '">'
+      + '<button type="button" data-view="' + v.id + '">'
+      + '<span class="n">' + icon(v.glyph) + '</span><span>' + v.label + '</span>'
+      + '<span class="tick">' + (v.id === 'capture' && hasDoc ? c.receipts.length : '') + '</span>'
+      + '</button></li>').join('');
+
+  const copy = PANE_COPY[state.view];
+  document.getElementById('paneTitle').textContent = copy[0];
+  document.getElementById('paneLede').textContent = copy[1];
+
+  const tabs = document.getElementById('quickTabs');
+  if (state.view === 'check' && hasDoc){
+    tabs.style.display = 'flex';
+    tabs.innerHTML = c.receipts.map(r =>
+      '<button type="button" role="tab" data-rcp="' + r.id + '"'
+      + ' aria-selected="' + (state.activeReceipt === r.id) + '">'
+      + r.id.replace('RCP-', '#') + (r.confirmed && tagsOf(r).length ? icon('check',13) : '') + '</button>').join('');
+  } else { tabs.style.display = 'none'; tabs.innerHTML = ''; }
+
+  /* no totals strip here — the claiming figure sits at the foot of the
+     line list, where the numbers it sums are. */
+  const strip = document.getElementById('summaryStrip');
+  strip.style.display = 'none';
+  strip.innerHTML = '';
+}
+
+/* ── 1. receipts ─────────────────────────────────────────────────── */
+function renderCapture(){
+  const used = state.claim.receipts.map(r => r.id);
+  const pending = FIXTURES.length - used.length;
+  const cards = FIXTURES.map(f =>
+    '<button type="button" class="fx-card ' + (used.indexOf(f.id) >= 0 ? 'used' : '') + '"'
+    + ' data-fixture="' + f.id + '">'
+    + '<span class="thumb">' + receiptSvg(f.doc) + '</span>'
+    + '<span class="meta"><span class="n">' + f.label + '</span>'
+    + '<span class="p">' + f.currency + ' · ' + f.script + '</span>'
+    + '<span class="f"><span>' + (used.indexOf(f.id) >= 0 ? 'Read' : 'Open') + '</span>'
+    + '<span>' + f.id.replace('RCP-', '#') + '</span></span></span></button>').join('');
+
+  document.getElementById('pane-capture').innerHTML =
+    '<div class="stack" style="max-width:820px">'
+    + stepper()
+    + '<div class="drop" id="drop">'
+    + '<div class="drop-icon">' + icon('upload',22) + '</div>'
+    + '<div class="big">Add a receipt</div>'
+    + '<div class="sm" id="dropMsg">Photograph it now and forget it — or '
+    + '<label class="link">choose a file<input type="file" id="file" class="sr"'
+    + ' accept="image/*,.pdf"></label>.</div></div>'
+    + '<div class="or"><span>or open a sample</span></div>'
+    + '<div class="fixtures">' + cards + '</div>'
+    + (pending > 1
+        ? '<div style="display:flex;justify-content:center">'
+          + '<button class="btn sm" type="button" id="loadAll">Read all ' + pending
+          + ' at once</button></div>' : '')
+    + (used.length
+        ? '<div style="display:flex;justify-content:center">'
+          + '<button class="btn primary" type="button" data-view="check">'
+          + 'Check ' + used.length + ' receipt' + (used.length === 1 ? '' : 's') + '</button></div>'
+        : '')
+    + '</div>';
+}
+
+/* ── 2. check one receipt ────────────────────────────────────────── */
+function renderCheck(){
+  const el = document.getElementById('pane-check');
+  const r = state.claim.receipts.find(x => x.id === state.activeReceipt);
+  if (!r){
+    el.innerHTML = '<div class="card"><div class="empty">No receipts yet.'
+      + '<div style="margin-top:12px"><button class="btn sm primary" type="button"'
+      + ' data-view="capture">Add one</button></div></div></div>';
+    return;
+  }
+  const fx = r._fx, cur = r.currency.value, t = receiptTotals(r);
+  const tags = tagsOf(r);
+  const next = state.claim.receipts.find(x => !x.confirmed || !tagsOf(x).length);
+
+  const lines = r.lines.map(l =>
+    '<div class="ln' + (l._status === 'excluded' ? ' off' : '') + '">'
+    + '<div class="ln-main">'
+    + '<div class="orig">' + esc(l.orig.value) + '</div>'
+    + '<div class="gloss">' + esc(l.gloss.value) + '</div>'
+    + (l._minConf < CONF_FLOOR
+        ? '<div class="edited"><span class="badge striped" style="padding:0 6px">'
+          + Math.round(l._minConf * 100) + '% sure</span>please check this one</div>' : '')
+    + editedNote(l.total, cur)
+    + (l._status === 'excluded'
+        ? '<div class="ln-off">Left off the claim — ' + offReason(l) + '</div>' : '')
+    + '</div>'
+    + '<div class="ln-amt">'
+    + fieldInput(r.id, 'total', l.total, {lid:l.id, type:'number', step:'0.01',
+        style:'text-align:right;height:40px;font-size:15px'})
+    + '<div class="muted" style="font-size:11px;margin-top:4px;text-align:right">' + cur + '</div>'
+    + '</div>'
+    + '<div class="ln-cat">' + catSelect(r.id, l.id, l.cat) + '</div>'
+    + '</div>').join('');
+
+  el.innerHTML = '<div class="stack" style="max-width:1080px">'
+    + stepper()
+    + '<div class="split">'
+    + '<div class="doc-col"><div class="doc-frame">'
+    + receiptSvg(FIXTURES.find(f => f.id === r.fixture).doc) + '</div>'
+    + '<div class="doc-meta"><span>' + r.id.replace('RCP-', '#') + '</span>'
+    + '<span>' + r.script + '</span></div></div>'
+
+    + '<div class="stack">'
+    + '<div class="card">'
+    + '<div class="hdr-fields">'
+    + hf('Merchant', fieldInput(r.id, 'merchant', r.merchant), 'wide')
+    + hf('Date', fieldInput(r.id, 'date', r.date))
+    + hf('People on the bill', fieldInput(r.id, 'heads', r.heads, {type:'number'}))
+    + '</div>'
+    + '<div class="body tight"><div class="lines">' + lines + '</div>'
+    + '<div class="ln-total"><span>You are claiming</span>'
+    + '<b>EUR ' + eur(t.reimbursable) + '</b></div></div></div>'
+
+    + '<div class="card"><header class="ruled"><div><h3>Which vessel were you attending?</h3>'
+    + '<p class="desc">Tap every vessel this receipt relates to. Finance works out the split.</p>'
+    + '</div></header><div class="body">'
+    + '<div class="chips">'
+    + VESSELS.concat(CENTRES).map(v =>
+        '<button type="button" class="chip lg' + (tags.indexOf(v.id) >= 0 ? ' on' : '') + '"'
+        + ' data-tag="' + v.id + '" data-rcp="' + r.id + '">'
+        + (tags.indexOf(v.id) >= 0 ? icon('check',15) : '') + v.name + '</button>').join('')
+    + '</div>'
+    + (tags.length > 1
+        ? '<p class="note" style="margin-top:12px">Two or more vessels — finance will apportion it.</p>'
+        : !tags.length
+          ? '<p class="note" style="margin-top:12px">Pick at least one before you send.</p>' : '')
+    + '</div>'
+    + '<footer><div class="muted" style="font-size:12.5px">'
+    + (r.confirmed ? 'Checked.' : 'Confirm when the numbers match the paper.') + '</div>'
+    + '<div class="row" style="gap:8px">'
+    + '<button class="btn ' + (r.confirmed ? '' : 'primary') + '" type="button"'
+    + ' data-confirm="' + r.id + '"' + (tags.length ? '' : ' disabled') + '>'
+    + (r.confirmed ? 'Reopen' : 'Looks right') + '</button>'
+    + (next && next.id !== r.id
+        ? '<button class="btn" type="button" data-rcpgo="' + next.id + '">Next receipt</button>'
+        : '<button class="btn ' + (readyToSend() ? 'primary' : '') + '" type="button"'
+          + ' data-view="send"' + (readyToSend() ? '' : ' disabled') + '>Send in</button>')
+    + '</div></footer></div>'
+    + '</div></div></div>';
+
+  function hf(label, input, wide){
+    return '<label class="hf' + (wide ? ' wide' : '') + '">'
+      + '<span>' + label + '</span>' + input + '</label>';
+  }
+}
+
+function offReason(l){
+  const rule = (l._rules || []).find(x => x.effect === 'excluded');
+  if (!rule) return 'company policy';
+  if (rule.id === 'POL-001') return 'alcohol is not reimbursable under company policy';
+  return rule.detail;
+}
+
+/* ── 3. send ─────────────────────────────────────────────────────── */
+function renderSend(){
+  const t = claimTotals(), rs = state.claim.receipts;
+  const sent = state.claim.status !== 'draft';
+  const flagged = [];
+  rs.forEach(r => r.lines.forEach(l => { if (l._status === 'review') flagged.push({r:r, l:l}); }));
+  const excluded = [];
+  rs.forEach(r => r.lines.forEach(l => { if (l._status === 'excluded') excluded.push({r:r, l:l}); }));
+
+  const vesselList = {};
+  rs.forEach(r => tagsOf(r).forEach(id => { vesselList[id] = (vesselList[id] || 0) + 1; }));
+
+  document.getElementById('pane-send').innerHTML =
+    '<div class="stack" style="max-width:760px">'
+    + stepper()
+
+    + (sent
+        ? '<div class="card"><div class="body" style="text-align:center;padding:34px 22px">'
+          + '<div class="drop-icon" style="margin-bottom:16px">✓</div>'
+          + '<h3 style="font-size:19px">Sent to finance</h3>'
+          + '<p class="note" style="margin-top:8px;max-width:44ch;margin-left:auto;margin-right:auto">'
+          + state.claim.id + ' went to the Limassol office on ' + state.claim.submittedOn
+          + '. They will apportion it across the vessels and come back to you only if something '
+          + 'needs explaining.</p></div></div>'
+        : '')
+
+    + '<div class="card"><header class="ruled"><div><h3>' + state.claim.title + '</h3>'
+    + '<p class="desc">' + state.claim.period + ' · ' + rs.length + ' receipt'
+    + (rs.length === 1 ? '' : 's') + '</p></div></header>'
+    + '<div class="body tight">'
+    + rs.map(r => {
+        const rt = receiptTotals(r);
+        return '<div class="sum-row"><div>'
+          + '<div style="font-weight:500">' + esc(String(r.merchant.value).split(' (')[0]) + '</div>'
+          + '<div class="muted" style="font-size:11.5px;margin-top:2px">' + r.date.value + ' · '
+          + tagsOf(r).map(id => { const v = targetById(id); return v ? v.name : id; }).join(' + ')
+          + '</div></div>'
+          + '<div style="text-align:right"><div style="font-weight:500">EUR '
+          + eur(rt.reimbursable) + '</div>'
+          + (rt.excluded > 0
+              ? '<div class="muted" style="font-size:11.5px;margin-top:2px;text-decoration:line-through">'
+                + eur(rt.excluded) + ' off</div>' : '')
+          + '</div></div>';
+      }).join('')
+    + '<div class="ln-total" style="padding:14px 18px"><span>Total claim</span>'
+    + '<b>EUR ' + eur(t.reimbursable) + '</b></div>'
+    + '</div></div>'
+
+    + (excluded.length
+        ? '<div class="card"><header class="ruled"><div><h3>Left off, and why</h3>'
+          + '<p class="desc">Shown so nothing is a surprise later. You do not need to do anything.</p>'
+          + '</div><span class="badge outline">EUR ' + eur(t.excluded) + '</span></header>'
+          + '<div class="body tight">'
+          + excluded.map(x => '<div class="sum-row"><div>' + esc(x.l.gloss.value)
+              + '<div class="muted" style="font-size:11.5px;margin-top:2px">'
+              + offReason(x.l) + '</div></div>'
+              + '<div class="muted" style="text-decoration:line-through">EUR '
+              + eur(x.l._base) + '</div></div>').join('')
+          + '</div></div>'
+        : '')
+
+    + (flagged.length
+        ? '<div class="callout"><strong>' + flagged.length + ' line'
+          + (flagged.length === 1 ? '' : 's') + ' finance will look at.</strong> '
+          + 'Over a cap or read with low confidence. Nothing is wrong — they may just ask.</div>'
+        : '')
+
+    + (sent ? ''
+        : '<div class="card"><footer style="border-top:0">'
+          + '<div class="muted" style="font-size:12.5px;max-width:44ch">'
+          + (readyToSend()
+              ? 'Everything is checked and tagged.'
+              : 'Check every receipt and tag a vessel first.') + '</div>'
+          + '<div class="row" style="gap:8px">'
+          + '<button class="btn" type="button" data-view="check">Back</button>'
+          + '<button class="btn ' + (readyToSend() ? 'primary' : '') + '" type="button" id="sendClaim"'
+          + (readyToSend() ? '' : ' disabled') + '>Send to finance</button>'
+          + '</div></footer></div>')
+    + '</div>';
+}
+
+/* ── dispatcher ──────────────────────────────────────────────────── */
+const RENDERERS = {capture:renderCapture, check:renderCheck, send:renderSend};
+function render(){
+  if (state.view !== 'capture' && !state.activeReceipt && state.claim.receipts.length){
+    state.activeReceipt = state.claim.receipts[0].id;
+  }
+  evaluateClaim();
+  renderChrome();
+  RENDERERS[state.view]();
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('pane-' + state.view).classList.add('on');
+}
+function go(view){
+  state.view = view;
+  render();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+/* ── events ──────────────────────────────────────────────────────── */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-view],[data-fixture],[data-tag],[data-confirm],[data-hdr],'
+    + '[data-rcpgo],#loadAll,#sendClaim,#themeBtn,#quickTabs button');
+  if (!el) return;
+
+  if (el.id === 'themeBtn'){ cycleTheme(); return; }
+  if (el.id === 'loadAll'){ captureAll(); return; }
+  if (el.dataset.fixture){ capture(el.dataset.fixture, false); return; }
+  if (el.closest('#quickTabs')){ state.activeReceipt = el.dataset.rcp; render(); return; }
+  if (el.dataset.rcpgo){ state.activeReceipt = el.dataset.rcpgo; go('check'); return; }
+  if (el.dataset.hdr){
+    state.editHeader = state.editHeader === el.dataset.hdr ? null : el.dataset.hdr;
+    render(); return;
+  }
+  if (el.dataset.tag){
+    toggleTag(receipt(el.dataset.rcp), el.dataset.tag);
+    render(); return;
+  }
+  if (el.dataset.confirm){
+    const r = receipt(el.dataset.confirm);
+    if (!r.confirmed && !tagsOf(r).length) return;
+    r.confirmed = !r.confirmed;
+    render();
+    toast(r.confirmed ? 'Receipt checked' : 'Receipt reopened');
+    return;
+  }
+  if (el.id === 'sendClaim'){
+    if (!readyToSend()) return;
+    state.claim.status = 'submitted';
+    state.claim.submittedOn = TODAY;
+    go('send');
+    toast('Sent to finance');
+    return;
+  }
+  if (el.dataset.view){ go(el.dataset.view); return; }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.edit){
+    const r = receipt(el.dataset.rcp);
+    if (!r) return;
+    const path = el.dataset.edit;
+    if (el.dataset.line){
+      const l = lineOf(r, el.dataset.line);
+      const before = l[path].value;
+      const val = path === 'total' ? Number(el.value) : el.value;
+      if (setField(l[path], val)){
+        logAudit(r.id, l.id + ' · ' + path, String(before), String(val));
+        render();
+        toast('Corrected — the original reading is kept');
+      }
+      return;
+    }
+    const before = r[path].value;
+    const val = path === 'heads' ? Number(el.value) : el.value;
+    if (setField(r[path], val)){
+      logAudit(r.id, path, String(before), String(val));
+      render();
+      toast('Corrected — the original reading is kept');
+    }
+    return;
+  }
+  if (el.id === 'file' && el.files && el.files[0]){
+    document.getElementById('dropMsg').innerHTML = '<b>' + esc(el.files[0].name)
+      + '</b> accepted. Reading is not wired to a model in this proof of concept — '
+      + 'open a sample to see the whole flow.';
+  }
+});
+
+document.addEventListener('dragover', e => {
+  const d = e.target.closest && e.target.closest('#drop');
+  if (d){ e.preventDefault(); d.classList.add('over'); }
+});
+document.addEventListener('dragleave', e => {
+  const d = e.target.closest && e.target.closest('#drop');
+  if (d) d.classList.remove('over');
+});
+document.addEventListener('drop', e => {
+  const d = e.target.closest && e.target.closest('#drop');
+  if (!d) return;
+  e.preventDefault();
+  d.classList.remove('over');
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  document.getElementById('dropMsg').innerHTML = f
+    ? '<b>' + esc(f.name) + '</b> accepted. Reading is not wired to a model here — '
+      + 'open a sample to see the whole flow.'
+    : 'That did not look like a file.';
+});
+
+const THEMES = [
+  {v:null, icon:'monitor', label:'Match system'},
+  {v:'light', icon:'sun', label:'Light'},
+  {v:'dark', icon:'moon', label:'Dark'}
+];
+let themeIdx = 0;
+function cycleTheme(){
+  themeIdx = (themeIdx + 1) % THEMES.length;
+  const t = THEMES[themeIdx];
+  if (t.v) document.documentElement.setAttribute('data-theme', t.v);
+  else document.documentElement.removeAttribute('data-theme');
+  document.getElementById('themeIcon').innerHTML = icon(t.icon, 16);
+  document.getElementById('themeLabel').textContent = t.label;
+}
+
+
+document.getElementById('themeIcon').innerHTML = icon('monitor', 16);
+render();
+</script>
+</body>
+</html>

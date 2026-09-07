@@ -1,0 +1,52 @@
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">
+        <span class="glyph">__GLYPH__</span>
+        <h1>__APPNAME__</h1>
+      </div>
+      <span class="sub">__APPSUB__</span>
+    </div>
+
+    <div class="role">
+      <span class="ic">__WHOIC__</span>
+      <span class="who"><b>__WHO__</b><span>__WHOROLE__</span></span>
+    </div>
+
+    <div class="side-group">
+      <ul class="nav" id="mainNav"></ul>
+    </div>
+
+    <div class="side-foot">
+      <ul class="nav" id="utilNav"></ul>
+      <button class="btn sm ghost" id="themeBtn" type="button" style="justify-content:flex-start">
+        <span id="themeIcon"></span> <span id="themeLabel">Match system</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="head">
+        <div>
+          <h2 id="paneTitle"></h2>
+          <p class="lede" id="paneLede"></p>
+        </div>
+        <div class="tabs" id="quickTabs"></div>
+      </div>
+      <div class="summary" id="summaryStrip"></div>
+    </div>
+__PANES__
+  </main>
+</div>
+
+<div class="overlay" id="overlay" role="status" aria-live="polite">
+  <div class="reading">
+    <h4 id="readTitle">Reading the receipt</h4>
+    <p class="muted" style="font-size:12.5px;margin-top:4px" id="readSub"></p>
+    <div class="prog"><i id="readBar"></i></div>
+    <ul class="stages" id="readStages"></ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>

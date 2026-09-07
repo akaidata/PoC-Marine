@@ -1,0 +1,2509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claim Review — Finance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Geist:wght@400..800&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* ── Clean design system tokens ─────────────────────────────────────
+   Palette, type, radii and elevation per .claude/skills/clean.
+   Two neutrals and no accent: pure white, warm off-white, near-black.
+   No gradients, no colour, no decorative shadow. */
+:root{
+  --background:#FFFFFF;
+  --foreground:#0F0E0C;
+  --card:#FFFFFF;
+  --muted:#F7F6F2;            /* warm off-white — alternate surfaces */
+  --muted-foreground:#6B6760;
+  --subtle-foreground:#A8A49F;
+  --border:#E8E6E1;
+  --input:#E8E6E1;
+  --ring:#0F0E0C;
+  --primary:#0F0E0C;
+  --primary-foreground:#FFFFFF;
+  --primary-hover:#333333;
+  --accent:#F7F6F2;           /* ghost-button hover */
+  --sidebar:#F7F6F2;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.09);
+  --radius:12px;              /* cards */
+  --radius-btn:8px;           /* buttons and inputs */
+  --font-display:"Geist","DM Sans",sans-serif;
+  --font-sans:"DM Sans","Geist",sans-serif;
+  --font-mono:"DM Sans","Geist",sans-serif;
+  --font-code:"Geist Mono","JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --background:#0F0E0C;
+    --foreground:#F7F6F2;
+    --card:#171614;
+    --muted:#1E1C19;
+    --muted-foreground:#A8A49F;
+    --subtle-foreground:#6B6760;
+    --border:#2A2724;
+    --input:#2A2724;
+    --ring:#F7F6F2;
+    --primary:#F7F6F2;
+    --primary-foreground:#0F0E0C;
+    --primary-hover:#DEDBD3;
+    --accent:#1E1C19;
+    --sidebar:#131211;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+    --shadow-hover:0 6px 20px rgba(0,0,0,.5);
+    --shadow-lg:0 8px 30px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --background:#0F0E0C;
+  --foreground:#F7F6F2;
+  --card:#171614;
+  --muted:#1E1C19;
+  --muted-foreground:#A8A49F;
+  --subtle-foreground:#6B6760;
+  --border:#2A2724;
+  --input:#2A2724;
+  --ring:#F7F6F2;
+  --primary:#F7F6F2;
+  --primary-foreground:#0F0E0C;
+  --primary-hover:#DEDBD3;
+  --accent:#1E1C19;
+  --sidebar:#131211;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.5);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.55);
+}
+
+/* ── base ──────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html,body{height:100%}
+/* Pure white ground. No gradient: rhythm comes from alternating white
+   against the warm off-white surface, never from colour. */
+body{margin:0;color:var(--foreground);background:var(--background);
+  font:16px/1.65 var(--font-sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-family:var(--font-display);font-weight:600;
+  letter-spacing:-.015em;line-height:1.25;text-wrap:balance;color:var(--foreground)}
+h2{font-weight:700;letter-spacing:-.02em}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit;margin:0}
+button{cursor:pointer;background:none;border:0}
+a{color:inherit}
+:focus-visible{outline:none;box-shadow:0 0 0 1px var(--background),0 0 0 3px var(--ring);border-radius:4px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";letter-spacing:-.005em}
+.tnum{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted-foreground)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+[hidden]{display:none !important}
+/* overline: the signature device for introducing a block */
+.label{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-muted,var(--subtle-foreground))}
+
+/* ── motion ────────────────────────────────────────────────────────
+   Motion answers what a person did — a value recomputing, a panel
+   opening. No staggered entrance on every card: that reads as
+   decoration and slows the screen down on arrival. */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.pane.on{animation:fadeIn .18s ease-out both}
+.bar-track i,.alloc-meter i{transition:width .25s ease}
+.summary .v,.stat .v{transition:color .18s ease}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important}
+}
+/* ── primitives ────────────────────────────────────────────────────── */
+/* Buttons: 8px radius, never pills. Ghost hovers to the warm surface,
+   primary lightens. Press is scale(0.98). */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;padding:0 24px;border-radius:var(--radius-btn);
+  font-size:14px;font-weight:500;white-space:nowrap;
+  border:1px solid var(--border);background:transparent;color:var(--foreground);
+  transition:all .18s ease}
+.btn:hover:not(:disabled){background:var(--accent)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.btn.primary:hover:not(:disabled){background:var(--primary-hover);border-color:var(--primary-hover)}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover:not(:disabled){background:var(--accent)}
+.btn.sm{height:32px;padding:0 16px;font-size:14px}
+.btn.xs{height:28px;padding:0 12px;font-size:12px}
+.btn.icon{width:32px;height:32px;padding:0}
+
+.input,.select{height:40px;padding:0 16px;border-radius:var(--radius-btn);
+  border:1px solid var(--input);background:var(--card);font-size:14px;
+  width:100%;transition:all .18s ease}
+.input:hover,.select:hover{border-color:var(--subtle-foreground)}
+.input.sm,.select.sm{height:32px;font-size:14px;padding:0 12px}
+.input:focus,.select:focus{outline:none;box-shadow:0 0 0 1px var(--ring)}
+.input.mono{font-family:var(--font-mono)}
+/* chevron drawn as an SVG, not a CSS gradient triangle */
+.select{appearance:none;padding-right:32px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6760' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-size:16px 16px;background-position:right 12px center;
+  background-repeat:no-repeat}
+.check{display:inline-flex;align-items:flex-start;gap:8px;cursor:pointer}
+.check input{appearance:none;width:16px;height:16px;flex:none;margin-top:1px;
+  border:1px solid var(--foreground);border-radius:4px;background:var(--background);
+  display:grid;place-content:center}
+.check input:checked{background:var(--primary);border-color:var(--primary)}
+.check input:checked::after{content:"";width:9px;height:5px;border-left:1.8px solid var(--primary-foreground);
+  border-bottom:1.8px solid var(--primary-foreground);transform:rotate(-45deg) translateY(-1px)}
+
+.switch{position:relative;width:40px;height:24px;flex:none;border-radius:999px;
+  border:1px solid var(--border);background:var(--muted);transition:background .18s,border-color .18s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;
+  border-radius:50%;background:var(--background);box-shadow:var(--shadow-sm);transition:transform .18s}
+.switch[aria-checked="true"]{background:var(--primary);border-color:var(--primary)}
+.switch[aria-checked="true"]::after{transform:translateX(16px)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;
+  padding:4px 12px;font-size:12px;font-weight:500;letter-spacing:.01em;
+  border:1px solid var(--border);white-space:nowrap}
+.badge.solid{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.badge.outline{color:var(--muted-foreground)}
+.badge.striped{border-color:var(--foreground);color:var(--foreground);background:var(--muted)}
+.badge.dot::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+
+/* Cards: white, 1px warm border, 12px radius, barely-there shadow that
+   lifts a little on hover. Structure only — never decoration. */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+  transition:box-shadow .18s ease,transform .18s ease}
+.card>header{padding:28px 32px 20px;display:flex;align-items:flex-start;
+  justify-content:space-between;gap:20px;flex-wrap:wrap}
+.card>header.ruled{border-bottom:1px solid var(--border);padding-bottom:24px}
+.card>header h3{font-size:20px;line-height:1.25}
+.card>header .desc{font-size:14px;color:var(--muted-foreground);margin-top:8px;
+  max-width:72ch;line-height:1.6}
+.card .body{padding:28px 32px}
+.card .body.tight{padding:0}
+.card>footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;
+  align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sep{height:1px;background:var(--border);border:0;margin:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:12px}
+.kv dt{color:var(--muted-foreground)}
+.kv dd{margin:0;text-align:right;font-family:var(--font-mono);font-size:12px}
+.grid{display:grid;gap:24px}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:32px}
+.callout{border:1px solid var(--border);border-radius:var(--radius-btn);
+  background:var(--muted);padding:16px 20px;font-size:14px;line-height:1.6;
+  color:var(--muted-foreground)}
+.callout strong{color:var(--foreground);font-weight:600}
+/* ── shell ─────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:264px minmax(0,1fr);min-height:100%}
+.side{background:var(--sidebar);border-right:1px solid var(--border);
+  /* flat surface, no blur */
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:28px;padding:28px 16px 24px}
+.brand{display:flex;flex-direction:column;gap:4px;padding:0 4px}
+.brand .mark{display:flex;align-items:center;gap:8px}
+.brand .glyph{width:28px;height:28px;border-radius:var(--radius-btn);background:var(--primary);
+  color:var(--primary-foreground);display:grid;place-content:center;
+  font-size:12px;font-weight:600;letter-spacing:.02em;flex:none}
+.brand h1{font-size:16px;line-height:1.2;font-weight:600}
+.brand .sub{font-size:14px;color:var(--muted-foreground);padding-left:40px}
+.side-group{display:flex;flex-direction:column;gap:8px}
+.side-group>.label{padding:0 12px}
+.trip{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);
+  background:var(--card);padding:12px 12px}
+.trip .t{font-size:12px;font-weight:600;line-height:1.35}
+.trip .legs{display:flex;flex-direction:column;gap:4px;margin-top:8px;
+  font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground)}
+.trip .legs span{display:flex;justify-content:space-between;gap:8px}
+/* SVG icons inherit text colour and sit on the text baseline */
+.ic{display:block;flex:none}
+
+.nav{display:flex;flex-direction:column;gap:4px;list-style:none;margin:0;padding:0}
+.nav button{display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:12px;
+  width:100%;text-align:left;padding:8px 12px;border-radius:var(--radius-btn);
+  font-size:14px;color:var(--muted-foreground);transition:all .18s ease}
+.nav button:hover{background:var(--accent);color:var(--foreground)}
+.nav .n{display:grid;place-content:center;color:var(--subtle-foreground);
+  transition:color .18s ease}
+.nav button:hover .n{color:var(--foreground)}
+.nav li.on button{background:var(--accent);color:var(--foreground);font-weight:500}
+.nav li.on .n{color:var(--foreground)}
+.nav .tick{font-size:12px;color:var(--subtle-foreground);font-variant-numeric:tabular-nums}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:4px;padding:0}
+
+/* ── topbar + panes ────────────────────────────────────────────────── */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;background:var(--background);
+  border-bottom:1px solid var(--border);padding:32px 40px 0}
+.topbar .head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+/* dramatic size contrast between the page title and everything else */
+.topbar h2{font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.025em}
+.topbar .lede{font-size:16px;color:var(--muted-foreground);margin-top:8px;
+  max-width:74ch;line-height:1.6}
+.tabs{display:flex;gap:4px;background:var(--muted);border-radius:var(--radius);padding:4px;flex:none}
+.tabs button{height:28px;padding:0 12px;border-radius:calc(var(--radius) - 3px);
+  font-size:12px;font-weight:500;color:var(--muted-foreground)}
+.tabs button[aria-selected="true"]{background:var(--background);color:var(--foreground);
+  box-shadow:var(--shadow-sm)}
+.summary{display:flex;overflow-x:auto;margin:16px -24px 0;padding:0 24px;
+  border-top:1px solid var(--border)}
+.summary .cell{padding:8px 24px 12px;border-right:1px solid var(--border);min-width:128px;flex:none}
+.summary .cell:first-child{padding-left:0}
+.summary .cell:last-child{border-right:0}
+.summary .k{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground)}
+.summary .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+  font-size:16px;font-weight:500;margin-top:4px;letter-spacing:-.02em}
+.summary .cell.strike .v{text-decoration:line-through;color:var(--muted-foreground);
+  text-decoration-thickness:1.5px}
+.summary .sub{font-size:12px;color:var(--subtle-foreground);font-family:var(--font-mono)}
+.pane{display:none;padding:40px 40px 96px}
+.pane.on{display:block}
+.pane-wide{max-width:1180px}
+
+/* ── stepper: the seven numbered steps, on the claim page ──────────── */
+.stepper{display:flex;list-style:none;margin:0 0 20px;padding:0;overflow-x:auto}
+.stepper li{flex:1;min-width:88px;position:relative}
+.stepper li::before,.stepper li::after{content:"";position:absolute;top:15px;height:2px;
+  background:var(--border);transition:background .25s}
+.stepper li::before{left:0;right:50%}
+.stepper li::after{left:50%;right:0}
+.stepper li:first-child::before,.stepper li:last-child::after{display:none}
+.stepper li.done::before,.stepper li.done::after,.stepper li.on::before{background:var(--foreground)}
+.stepper button{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
+  gap:8px;width:100%;padding:0}
+.stepper .dot{width:32px;height:32px;border-radius:50%;display:grid;place-content:center;
+  font-size:14px;font-weight:500;background:var(--background);border:1px solid var(--border);
+  color:var(--subtle-foreground);transition:all .18s ease}
+.stepper li.done .dot{border-color:var(--foreground);color:var(--foreground)}
+.stepper li.on .dot{background:var(--primary);border-color:var(--primary);
+  color:var(--primary-foreground)}
+.stepper .lb{font-size:12px;line-height:1.3;text-align:center;color:var(--muted-foreground);
+  transition:color .18s ease}
+.stepper li.on .lb{color:var(--foreground);font-weight:600}
+.stepper button:hover .dot{border-color:var(--foreground)}
+.stepper button:hover .lb{color:var(--foreground)}
+
+/* ── two-column review split ───────────────────────────────────────── */
+.split{display:grid;grid-template-columns:minmax(300px,340px) minmax(0,1fr);
+  gap:20px;align-items:start}
+.doc-col{position:sticky;top:150px;display:flex;flex-direction:column;gap:12px}
+.doc-frame{border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);
+  padding:16px;box-shadow:var(--shadow)}
+.doc-frame svg{display:block;width:100%;height:auto;border-radius:3px;
+  box-shadow:0 1px 3px rgb(0 0 0 / .18)}
+.doc-meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;
+  color:var(--muted-foreground);font-family:var(--font-mono)}
+@media (max-width:1080px){
+  .split{grid-template-columns:1fr}
+  .doc-col{position:static}
+}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto}
+}
+/* ── ledger ────────────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+table.tbl th{text-align:left;font-size:12px;font-weight:500;
+  color:var(--muted-foreground);padding:12px 12px;
+  border-bottom:1px solid var(--border);white-space:nowrap;background:var(--card)}
+table.tbl td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top}
+table.tbl tbody tr{transition:background .18s}
+table.tbl tbody tr:hover{background:color-mix(in srgb,var(--muted) 55%,transparent)}
+table.tbl tr:last-child td{border-bottom:0}
+table.tbl th.r,table.tbl td.r{text-align:right}
+table.tbl td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.tbl tfoot td{border-top:1px solid var(--border);border-bottom:0;font-weight:600;
+  background:var(--muted)}
+
+.ledger tbody tr{position:relative}
+.ledger td.st{width:3px;padding:0;background:transparent}
+.ledger tr[data-st="excluded"] td.st{background:var(--foreground)}
+.ledger tr[data-st="review"] td.st{background:var(--subtle-foreground)}
+.ledger tr[data-st="excluded"] .amt{text-decoration:line-through;
+  text-decoration-thickness:1.5px;color:var(--muted-foreground)}
+.ledger tr[data-st="excluded"]{background:color-mix(in srgb,var(--muted) 60%,transparent)}
+.orig{font-size:14px;line-height:1.35;
+  font-family:"Malgun Gothic","Microsoft YaHei","Noto Sans CJK KR","Apple SD Gothic Neo",var(--font-sans)}
+.gloss{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.gloss::before{content:"→ ";color:var(--subtle-foreground)}
+.conf{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);
+  font-size:12px;color:var(--muted-foreground)}
+.conf .bar{width:26px;height:4px;border-radius:2px;background:var(--muted);
+  border:1px solid var(--border);overflow:hidden;flex:none}
+.conf .bar i{display:block;height:100%;background:var(--foreground)}
+.conf.low{color:var(--foreground);font-weight:600}
+.edited{font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground);
+  margin-top:4px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.edited s{text-decoration-thickness:1px}
+.rule-line{display:flex;align-items:flex-start;gap:8px;font-size:12px;
+  color:var(--muted-foreground);margin-top:4px;line-height:1.4}
+.rule-line .rid{font-family:var(--font-mono);font-size:12px;font-weight:600;
+  border:1px solid var(--border);border-radius:3px;padding:0 4px;color:var(--foreground);flex:none}
+.rule-line.satisfied .rid{border-style:dashed}
+.line-note{margin-top:8px}
+.alloc-chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);
+  font-size:12px;border:1px solid var(--border);border-radius:999px;padding:1px 8px;
+  color:var(--muted-foreground)}
+
+/* ── policy panel ──────────────────────────────────────────────────── */
+.rules{display:flex;flex-direction:column;gap:0}
+.rule{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--border)}
+.rule:last-child{border-bottom:0}
+.rule .rid{font-family:var(--font-mono);font-size:12px;font-weight:600;
+  border:1px solid var(--border);border-radius:4px;padding:4px 8px;flex:none}
+.rule .t{font-size:14px;font-weight:500}
+.rule .d{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.rule .d .type{font-size:12px;color:var(--subtle-foreground)}
+.rule .bite{font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground);
+  text-align:right;min-width:74px}
+
+/* ── allocation ────────────────────────────────────────────────────── */
+.alloc-rows{display:flex;flex-direction:column;gap:8px}
+.alloc-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 96px 30px;gap:8px;align-items:center}
+.alloc-row .owner{font-size:12px;color:var(--muted-foreground);font-family:var(--font-mono);
+  grid-column:1;margin-top:-4px}
+.alloc-meter{height:8px;border-radius:999px;background:var(--muted);border:1px solid var(--border);
+  overflow:hidden;display:flex;margin-top:4px}
+.alloc-meter i{display:block;height:100%;border-right:1px solid var(--background)}
+.alloc-meter i:nth-child(1){background:var(--foreground)}
+.alloc-meter i:nth-child(2){background:color-mix(in srgb,var(--foreground) 55%,var(--background))}
+.alloc-meter i:nth-child(3){background:color-mix(in srgb,var(--foreground) 30%,var(--background))}
+.alloc-meter i:nth-child(4){background:color-mix(in srgb,var(--foreground) 15%,var(--background))}
+.alloc-state{font-family:var(--font-mono);font-size:12px;margin-top:8px}
+.alloc-state.bad{font-weight:600}
+
+/* ── overlay ───────────────────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;z-index:80;display:none;place-content:center;
+  background:color-mix(in srgb,var(--background) 78%,transparent);backdrop-filter:blur(3px)}
+.overlay.on{display:grid}
+.reading{width:min(420px,90vw);background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px}
+.reading h4{font-size:14px}
+.reading .prog{height:5px;border-radius:999px;background:var(--muted);overflow:hidden;margin:16px 0}
+.reading .prog i{display:block;height:100%;background:var(--foreground);width:0;transition:width .25s linear}
+.stages{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;
+  font-size:12px;font-family:var(--font-mono)}
+.stages li{display:grid;grid-template-columns:16px 1fr;gap:8px;color:var(--subtle-foreground)}
+.stages li .m{text-align:center}
+.stages li.doing{color:var(--foreground)}
+.stages li.done{color:var(--muted-foreground)}
+.spin{display:inline-block;width:9px;height:9px;border:1.6px solid var(--foreground);
+  border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* ── capture ───────────────────────────────────────────────────────── */
+.fixtures{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.fx-card{display:flex;flex-direction:column;text-align:left;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  overflow:hidden;transition:border-color .18s,box-shadow .18s,transform .18s}
+.fx-card:hover{border-color:var(--foreground);box-shadow:var(--shadow);transform:translateY(-1px)}
+.fx-card .thumb{background:var(--muted);border-bottom:1px solid var(--border);
+  padding:12px 12px 0;height:128px;overflow:hidden;display:grid;place-items:start center}
+.fx-card .thumb svg{width:104px;height:auto;box-shadow:0 1px 4px rgb(0 0 0 / .2);border-radius:2px}
+.fx-card .meta{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.fx-card .n{font-size:14px;font-weight:600;line-height:1.3}
+.fx-card .p{font-size:12px;color:var(--muted-foreground);line-height:1.4;flex:1}
+.fx-card .f{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground)}
+.fx-card.used{opacity:.62}
+.drop{border:1px dashed var(--input);border-radius:var(--radius);padding:64px 32px 56px;
+  text-align:center;background:var(--muted);transition:all .18s ease}
+.drop:hover{border-color:var(--subtle-foreground)}
+.drop.over{border-color:var(--foreground);background:var(--card)}
+.drop-icon{width:48px;height:48px;margin:0 auto 20px;border-radius:var(--radius);
+  background:var(--card);border:1px solid var(--border);display:grid;place-content:center;
+  color:var(--muted-foreground);transition:all .18s ease}
+.drop:hover .drop-icon{color:var(--foreground);border-color:var(--subtle-foreground)}
+.drop .big{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-.02em}
+.drop .sm{font-size:14px;color:var(--muted-foreground);margin-top:8px;max-width:48ch;
+  margin-left:auto;margin-right:auto;line-height:1.6}
+.link{text-decoration:underline;text-underline-offset:2px;cursor:pointer;color:var(--foreground)}
+.or{display:flex;align-items:center;gap:20px;color:var(--subtle-foreground);font-size:12px;
+  letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ── payload ───────────────────────────────────────────────────────── */
+pre.payload{margin:0;padding:16px 16px;font-family:var(--font-code);font-size:12px;
+  line-height:1.6;background:var(--muted);border-radius:12px;
+  border:1px solid var(--border);overflow-x:auto;max-height:620px;overflow-y:auto;
+  white-space:pre;tab-size:2}
+
+/* ── dashboard ─────────────────────────────────────────────────────── */
+.dash-top{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:16px}
+@media (max-width:1120px){.dash-top{grid-template-columns:1fr 1fr}}
+@media (max-width:680px){.dash-top{grid-template-columns:1fr}}
+/* the one dominant figure — carried by type size, not by a wash */
+.stat.hero{grid-row:span 2;display:flex;flex-direction:column;justify-content:center;
+  padding:32px;background:var(--card)}
+.stat.hero .v{font-family:var(--font-display);font-size:48px;font-weight:700;
+  letter-spacing:-.035em;line-height:1.05;margin-top:12px}
+.stat.hero .s{font-size:14px;margin-top:16px;max-width:36ch;line-height:1.6}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:16px}
+.stat{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);
+  padding:16px 16px;box-shadow:var(--shadow-sm)}
+.stat .k{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground)}
+.stat .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:24px;
+  font-weight:500;letter-spacing:-.03em;margin-top:4px;line-height:1.1}
+.stat .s{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bars{gap:16px}
+.bar-row{display:grid;grid-template-columns:minmax(130px,1.1fr) minmax(0,2.4fr) 96px;
+  gap:16px;align-items:center;font-size:14px}
+.bar-row .nm{line-height:1.3;font-weight:500}
+.bar-row .nm small{display:block;font-size:12px;font-weight:400;
+  color:var(--muted-foreground);letter-spacing:.01em}
+.bar-track{height:10px;background:var(--muted);border-radius:999px;overflow:hidden}
+.bar-track i{display:block;height:100%;border-radius:999px;
+  background:color-mix(in srgb,var(--foreground) 74%,var(--card))}
+.bar-track i.lead{background:var(--foreground)}
+.bar-track i.hatch{background:var(--subtle-foreground)}
+.bar-row .vv{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:500}
+.status-strip{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.status-strip .s{flex:1;padding:12px 16px;border-right:1px solid var(--border)}
+.status-strip .s:last-child{border-right:0}
+.status-strip .s .n{font-family:var(--font-mono);font-size:20px;font-weight:500}
+.status-strip .s .l{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground);margin-top:4px}
+
+/* ── ask ───────────────────────────────────────────────────────────── */
+.chat{display:flex;flex-direction:column;gap:16px;max-height:460px;overflow-y:auto;padding:4px}
+.msg{max-width:74ch;font-size:14px;line-height:1.55}
+.msg.you{align-self:flex-end;background:var(--primary);color:var(--primary-foreground);
+  border-radius:var(--radius) var(--radius) 3px var(--radius);padding:8px 12px}
+.msg.bot{align-self:flex-start;border:1px solid var(--border);background:var(--card);
+  border-radius:var(--radius) var(--radius) var(--radius) 3px;padding:12px 16px;
+  box-shadow:var(--shadow-sm)}
+.msg.bot .hdr{font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--muted-foreground);margin-bottom:8px}
+.msg.bot ul{margin:8px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:4px}
+.msg.bot .cites{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);
+  font-family:var(--font-mono);font-size:12px;color:var(--muted-foreground);
+  display:flex;gap:8px;flex-wrap:wrap}
+.msg.bot .cites b{font-weight:600;color:var(--foreground)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);
+  border-radius:100px;padding:8px 16px;font-size:14px;
+  background:var(--card);color:var(--muted-foreground);transition:all .18s ease}
+.chip:hover{background:var(--accent);color:var(--foreground)}
+.ask-form{display:flex;gap:12px;margin-top:20px}
+
+/* ── limits ────────────────────────────────────────────────────────── */
+.limits{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.limits li{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--border);font-size:14px;line-height:1.5}
+.limits li:last-child{border-bottom:0}
+.limits .t{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;border:1px solid var(--border);border-radius:4px;padding:4px 8px;
+  height:fit-content;white-space:nowrap;color:var(--muted-foreground)}
+.limits b{font-weight:600}
+.audit{width:100%;border-collapse:collapse;font-size:12px}
+.audit th{text-align:left;font-size:12px;letter-spacing:0;
+  font-weight:600;color:var(--muted-foreground);padding:8px 8px;border-bottom:1px solid var(--border)}
+.audit td{padding:8px 8px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px}
+.audit tr:last-child td{border-bottom:0}
+.empty{padding:24px;text-align:center;font-size:12px;color:var(--muted-foreground)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);
+  background:var(--primary);color:var(--primary-foreground);padding:8px 16px;border-radius:999px;
+  font-size:12px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;
+  transition:opacity .18s,transform .18s;z-index:90}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ── additions for the two role apps ──────────────────────────────── */
+
+/* superintendent line list — bigger touch targets than a table */
+.lines{display:flex;flex-direction:column}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 130px 160px;gap:20px;
+  padding:20px 32px;border-bottom:1px solid var(--border);align-items:start;
+  transition:background .18s ease}
+.ln:hover{background:var(--muted)}
+.ln:last-child{border-bottom:0}
+.ln.off{background:var(--muted)}
+.ln.off .orig,.ln.off .gloss{text-decoration:line-through;
+  text-decoration-thickness:1px;color:var(--muted-foreground)}
+.ln-off{font-size:14px;color:var(--muted-foreground);margin-top:8px;
+  padding-left:16px;border-left:1px solid var(--foreground);line-height:1.55}
+.ln-total{display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;background:var(--muted);font-size:16px}
+.ln-total b{font-family:var(--font-display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:720px){
+  .ln{grid-template-columns:1fr 1fr;gap:8px}
+  .ln-main{grid-column:1 / -1}
+}
+
+/* the receipt's own fields, editable on sight — no reveal button */
+.hdr-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;
+  padding:28px 32px;border-bottom:1px solid var(--border)}
+.hf{display:block;min-width:0}
+.hf.wide{grid-column:1 / -1}
+.hf>span{display:block;font-size:14px;color:var(--muted-foreground);margin-bottom:8px}
+@media (max-width:560px){.hdr-fields{grid-template-columns:1fr}}
+
+/* the conversion note under a receipt, with its rate override inline */
+.fx-note{font-size:14px;color:var(--muted-foreground);line-height:1.7;margin:0}
+.lnk{font:inherit;color:var(--foreground);text-decoration:underline;
+  text-underline-offset:2px;padding:0;cursor:pointer;background:none;border:0}
+.lnk:hover{opacity:.7}
+.rate-in{font:inherit;font-variant-numeric:tabular-nums;width:82px;padding:1px 4px;
+  border:1px solid var(--input);border-radius:6px;background:var(--card);
+  color:var(--foreground);text-align:right}
+
+/* summary rows, used on both apps */
+.sum-row{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 32px;border-bottom:1px solid var(--border);font-size:14px}
+.sum-row:last-child{border-bottom:0}
+
+/* the two evidence facts, toggled in place on the document card */
+.att{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:12px;
+  font-weight:500;padding:4px 12px;border-radius:100px;
+  border:1px solid var(--border);background:none;color:var(--muted-foreground);
+  cursor:pointer;white-space:nowrap;transition:all .18s ease}
+.att:hover{border-color:var(--foreground);color:var(--foreground)}
+.att.on{border-style:solid;border-color:var(--primary);background:var(--primary);
+  color:var(--primary-foreground)}
+
+/* selectable chips — the superintendent's vessel tags */
+.chip.lg{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:14px;
+  border-radius:100px;font-weight:500}
+.chip.lg.on{background:var(--primary);color:var(--primary-foreground);
+  border-color:var(--primary)}
+.chip.lg.on:hover{background:var(--primary);color:var(--primary-foreground);opacity:.9}
+
+/* role banner in the sidebar */
+.role{display:flex;align-items:center;gap:12px;padding:0 4px;margin:0}
+.role .ic{width:32px;height:32px;border-radius:100px;flex:none;display:grid;
+  place-content:center;font-size:12px;background:var(--card);
+  border:1px solid var(--border);color:var(--foreground);font-weight:600}
+.role .who{min-width:0}
+.role .who b{display:block;font-size:14px;font-weight:500;line-height:1.3}
+.role .who span{display:block;font-size:12px;color:var(--muted-foreground);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── explicit interaction states ────────────────────────────────────
+   Every interactive control declares hover, press, focus and disabled.
+   Static containers do not — a card that lifts under the cursor but
+   does nothing when clicked is a false affordance. */
+.fx-card:active{transform:scale(.99)}
+.fx-card:disabled{opacity:.4;cursor:not-allowed}
+.chip:active,.chip.lg:active,.att:active{transform:scale(.98)}
+.switch:hover{border-color:var(--subtle-foreground)}
+.switch:active::after{width:20px}
+.stepper button:active .dot{transform:scale(.96)}
+.nav button:active{transform:scale(.99)}
+.lnk:active{opacity:.5}
+.rate-in:hover{border-color:var(--subtle-foreground)}
+.rate-in:focus{outline:none;box-shadow:0 0 0 1px var(--ring)}
+.input:disabled,.select:disabled{opacity:.5;cursor:not-allowed;background:var(--muted)}
+
+/* the receipt cards are the one place a lift is honest: they are the
+   primary action on the capture screen */
+.fx-card:hover{box-shadow:var(--shadow-hover)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">
+        <span class="glyph">FN</span>
+        <h1>Claim Review</h1>
+      </div>
+      <span class="sub">Owner recharge, VAT</span>
+    </div>
+
+    <div class="role">
+      <span class="ic">MK</span>
+      <span class="who"><b>M. Kyriakou</b><span>Finance, Limassol office</span></span>
+    </div>
+
+    <div class="side-group">
+      <ul class="nav" id="mainNav"></ul>
+    </div>
+
+    <div class="side-foot">
+      <ul class="nav" id="utilNav"></ul>
+      <button class="btn sm ghost" id="themeBtn" type="button" style="justify-content:flex-start">
+        <span id="themeIcon"></span> <span id="themeLabel">Match system</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="head">
+        <div>
+          <h2 id="paneTitle"></h2>
+          <p class="lede" id="paneLede"></p>
+        </div>
+        <div class="tabs" id="quickTabs"></div>
+      </div>
+      <div class="summary" id="summaryStrip"></div>
+    </div>
+    <section class="pane" id="pane-inbox"></section>
+    <section class="pane" id="pane-extract"></section>
+    <section class="pane" id="pane-policy"></section>
+    <section class="pane" id="pane-alloc"></section>
+    <section class="pane" id="pane-payload"></section>
+    <section class="pane" id="pane-dashboard"></section>
+    <section class="pane" id="pane-ask"></section>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" role="status" aria-live="polite">
+  <div class="reading">
+    <h4 id="readTitle">Reading the receipt</h4>
+    <p class="muted" style="font-size:12.5px;margin-top:4px" id="readSub"></p>
+    <div class="prog"><i id="readBar"></i></div>
+    <ul class="stages" id="readStages"></ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ══ reference data ═════════════════════════════════════════════════ */
+const TODAY = '2026-09-07';
+const BASE  = 'EUR';
+
+const OWNERS = [
+  {id:'OWN-HELIOS', name:'Helios Maritime Ltd',        agreement:'SHIPMAN 2009 — Cl. 8 recharge'},
+  {id:'OWN-NORD',   name:'Nordline Bereederung GmbH',  agreement:'SHIPMAN 2009 — Cl. 8 recharge'}
+];
+const VESSELS = [
+  {id:'V-ATL', name:'MV Atlantic Sentinel', imo:'9483721', type:'Bulk carrier · 63,500 dwt',    owner:'OWN-HELIOS'},
+  {id:'V-KYR', name:'MT Kyrenia Star',      imo:'9612044', type:'Product tanker · 49,900 dwt',  owner:'OWN-HELIOS'},
+  {id:'V-AEG', name:'MV Aegean Trader',     imo:'9330118', type:'Container feeder · 1,730 TEU', owner:'OWN-NORD'}
+];
+const CENTRES = [
+  {id:'CC-LIM', name:'Office — Limassol', type:'Cost centre · overhead', owner:null}
+];
+const CATEGORIES = ['Meals','Alcohol','Accommodation','Ground transport','Air travel',
+  'Communications','Laundry','Supplies','Port and agency fees','Other'];
+
+/* historical FX — fixture table, keyed to the transaction date */
+const FX_TABLE = {
+  'KRW|2026-08-18': 0.0006329,
+  'CNY|2026-08-21': 0.1204,
+  'EUR|2026-08-25': 1
+};
+const FX_SOURCE = 'Static fixture table (ECB daily reference, transaction date)';
+
+/* policy — data, not code */
+const POLICY = [
+  {id:'POL-001', type:'category_exclusion', enabled:true,  category:'Alcohol',
+   title:'Alcohol is not reimbursable',
+   detail:'Any line categorised Alcohol is excluded from the claim total.'},
+  {id:'POL-002', type:'allowed_with_condition', enabled:false, category:'Alcohol',
+   title:'Alcohol reimbursable when entertaining a client',
+   detail:'Overrides POL-001, but only on documents where client entertainment is recorded and attested.'},
+  {id:'POL-003', type:'per_item_cap', enabled:true, category:'Meals', threshold:60,
+   title:'Meals over EUR 60 per head need review',
+   detail:'Line total converted to base currency, divided by the head count on the document.'},
+  {id:'POL-004', type:'daily_cap', enabled:true, category:'Meals', threshold:120,
+   title:'Total meals over EUR 120 per day need review',
+   detail:'Summed across every document in the claim bearing the same transaction date.'},
+  {id:'POL-005', type:'required_evidence', enabled:true, category:'Accommodation', threshold:200,
+   title:'Accommodation over EUR 200 requires an itemised invoice',
+   detail:'Satisfied when an itemised invoice is attested on the document in step 5.'}
+];
+const CONF_FLOOR = 0.60;
+/* ══ receipt facsimile renderer ═════════════════════════════════════
+   Synthetic demo documents. Drawn as SVG so the file stays standalone —
+   no external images, nothing to fetch. Always dark ink on white paper,
+   because this stands in for a photograph of paper. */
+const CJK_FACE = "Malgun Gothic, Microsoft YaHei, Noto Sans CJK KR, Apple SD Gothic Neo, sans-serif";
+const MONO_FACE = "Consolas, Courier New, monospace";
+const HAND_FACE = "Segoe Script, Ink Free, Bradley Hand, cursive";
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function receiptSvg(spec){
+  const W = 300, L = 20, R = W - 20, MID = W / 2;
+  const face = spec.face || MONO_FACE;
+  const ink = '#141414';
+  let y = 0;
+  const el = [];
+  const txt = (x, s, o) => {
+    o = o || {};
+    el.push('<text x="' + x + '" y="' + y + '" font-family="' + (o.face || face) + '"'
+      + ' font-size="' + (o.size || 8.6) + '" font-weight="' + (o.w || 400) + '"'
+      + ' text-anchor="' + (o.anchor || 'start') + '" fill="' + ink + '"'
+      + ' opacity="' + (o.op || 1) + '"' + (o.extra || '') + '>' + esc(s) + '</text>');
+  };
+  const rule = (dash) => {
+    el.push('<line x1="' + L + '" y1="' + y + '" x2="' + R + '" y2="' + y + '"'
+      + ' stroke="' + ink + '" stroke-width="0.7" opacity="0.5"'
+      + (dash ? ' stroke-dasharray="2 2"' : '') + '/>');
+  };
+
+  y = 26;
+  (spec.head || []).forEach((h, i) => {
+    txt(MID, h.t, {anchor:'middle', size:h.size || (i === 0 ? 11 : 8.4),
+      w:h.w || (i === 0 ? 600 : 400), face:h.face || (spec.headFace || face), op:h.op});
+    y += (h.gap || (i === 0 ? 14 : 11));
+  });
+
+  y += 3; rule(); y += 12;
+  (spec.info || []).forEach(r => {
+    txt(L, r[0], {size:7.8, op:.82}); txt(R, r[1], {size:7.8, anchor:'end', op:.82}); y += 10;
+  });
+
+  y += 2; rule(true); y += 13;
+  (spec.items || []).forEach(it => {
+    txt(L, it.d, {size:it.size || 8.6, face:it.face || spec.itemFace || face, w:it.w || 400, op:it.op});
+    txt(R, it.a, {size:8.6, anchor:'end', op:it.op});
+    y += 11;
+    if (it.sub){ txt(L + 8, it.sub, {size:7.4, op:(it.op || 1) * .72}); y += 10; }
+  });
+
+  y += 3; rule(true); y += 13;
+  (spec.totals || []).forEach(t => {
+    txt(L, t[0], {size:t[2] ? 9.6 : 8.4, w:t[2] ? 600 : 400, op:t[3] || 1});
+    txt(R, t[1], {size:t[2] ? 9.6 : 8.4, w:t[2] ? 600 : 400, anchor:'end', op:t[3] || 1});
+    y += t[2] ? 14 : 11;
+  });
+
+  y += 4; rule(); y += 13;
+  (spec.foot || []).forEach(f => {
+    txt(MID, f, {size:7.4, anchor:'middle', op:.62}); y += 10;
+  });
+
+  const H = y + 12;
+  const paper = '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#fdfdfc"/>'
+    + '<rect x="0.5" y="0.5" width="' + (W - 1) + '" height="' + (H - 1) + '" fill="none"'
+    + ' stroke="#141414" stroke-opacity="0.12"/>';
+  const grain = spec.aged
+    ? '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#141414" opacity="0.035"/>'
+    : '';
+  const tilt = spec.tilt ? ' transform="rotate(' + spec.tilt + ' ' + (W / 2) + ' ' + (H / 2) + ')"' : '';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="'
+    + esc(spec.alt || 'Receipt facsimile') + '" xmlns="http://www.w3.org/2000/svg">'
+    + paper + '<g' + tilt + '>' + el.join('') + '</g>' + grain + '</svg>';
+}
+/* ══ fixtures ═══════════════════════════════════════════════════════
+   Four synthetic receipts and the extraction each one yields. In a wired
+   build `ext` would be the model's response; here it is pre-recorded, so
+   the demo never depends on a network call in a meeting room. */
+function L(orig, gloss, qty, unit, total, cat, taxRate, conf){
+  return {orig:orig, gloss:gloss, qty:qty, unit:unit, total:total,
+          cat:cat, taxRate:taxRate, conf:conf || {}};
+}
+
+const FIXTURES = [];
+
+FIXTURES.push({
+  id:'RCP-01', label:'Restaurant — Busan', script:'Korean (ko-KR)', currency:'KRW',
+  purpose:'Non-Latin script, line-item extraction, and the alcohol exclusion',
+  doc:{
+    alt:'Korean restaurant receipt from Busan, printed in Hangul',
+    headFace:CJK_FACE, itemFace:CJK_FACE,
+    head:[{t:'해운대 소갈비'},{t:'HAEUNDAE SO-GALBI · 본점', size:7.6, face:MONO_FACE}],
+    info:[['사업자 617-81-04204','TABLE 7'],['부산 해운대구 구남로 21','2인'],
+          ['2026-08-18','20:41'],['영수증 A-20268','POS 02']],
+    items:[
+      {d:'한우 정식 코스', a:'220,000', sub:'2 x 110,000'},
+      {d:'참이슬 후레쉬 360ml', a:'10,000', sub:'2 x 5,000'},
+      {d:'카스 생맥주 500cc', a:'14,000', sub:'2 x 7,000'},
+      {d:'공기밥', a:'4,000', sub:'2 x 2,000'}],
+    totals:[['과세물품가액','225,455'],['부가세 10%','22,545'],['합계 KRW','248,000',true]],
+    foot:['카드결제  신한 ****4471','감사합니다']
+  },
+  ext:{
+    merchant:['해운대 소갈비 (Haeundae So-Galbi)', .96],
+    address:['부산 해운대구 구남로 21, Busan', .91],
+    country:['Korea, Republic of', .97],
+    docNo:['A-20268', .93],
+    date:['2026-08-18', .97], time:['20:41', .93],
+    currency:['KRW', .99], heads:[2, .86],
+    taxInclusive:true, itemisedInvoice:true,
+    clientEntertainment:true,
+    entertainmentNote:'Dae Sung HI yard superintendent and owner’s representative present — docking spec review',
+    docTotal:[248000, .98],
+    alloc:[{target:'V-ATL', share:60},{target:'V-KYR', share:40}],
+    allocReason:'Yard dinner covered the Atlantic Sentinel docking in progress and the Kyrenia Star docking spec quoted by the same yard.',
+    lines:[
+      L('한우 정식 코스','Hanwoo beef set course', 2, 110000, 220000, 'Meals', 10, {orig:.97,total:.96}),
+      L('참이슬 후레쉬 360ml','Chamisul Fresh soju, 360ml', 2, 5000, 10000, 'Alcohol', 10, {orig:.94,total:.95}),
+      L('카스 생맥주 500cc','Cass draught beer, 500cc', 2, 7000, 14000, 'Alcohol', 10, {orig:.92,total:.94}),
+      L('공기밥','Steamed rice', 2, 2000, 4000, 'Meals', 10, {orig:.97,total:.97})
+    ]
+  }
+});
+
+FIXTURES.push({
+  id:'RCP-02', label:'Hotel folio — Shanghai', script:'Chinese (zh-CN)', currency:'CNY',
+  purpose:'One document spanning four categories with mixed policy outcomes',
+  doc:{
+    alt:'Chinese hotel folio from Shanghai, printed in simplified Chinese',
+    headFace:CJK_FACE, itemFace:CJK_FACE,
+    head:[{t:'上海浦东嘉里大酒店'},
+          {t:'KERRY HOTEL PUDONG · GUEST FOLIO', size:7.4, face:MONO_FACE}],
+    info:[['房号 ROOM','1812'],['花木路1388号 浦东新区','GUEST 1'],
+          ['入住 2026-08-18','退房 2026-08-21'],['账单号','FOL-88214']],
+    items:[
+      {d:'客房费 3晚', a:'2,340.00', sub:'3 x 780.00'},
+      {d:'迷你吧 青岛啤酒', a:'90.00', sub:'2 x 45.00'},
+      {d:'洗衣服务', a:'120.00'},
+      {d:'商务中心 打印', a:'35.00'},
+      {d:'早餐 3份', a:'264.00', sub:'3 x 88.00'}],
+    totals:[['小计','2,687.74'],['增值税 6%','161.26'],['应付总额 CNY','2,849.00',true]],
+    foot:['增值税专用发票已开具','客人签名  D. CHARALAMBOUS']
+  },
+  ext:{
+    merchant:['上海浦东嘉里大酒店 (Kerry Hotel Pudong)', .95],
+    address:['花木路1388号, 浦东新区, Shanghai', .9],
+    country:['China', .98],
+    docNo:['FOL-88214', .96],
+    date:['2026-08-21', .95], time:['11:04', .82],
+    currency:['CNY', .99], heads:[1, .9],
+    taxInclusive:true, itemisedInvoice:true,
+    clientEntertainment:false, entertainmentNote:'',
+    docTotal:[2849, .97],
+    alloc:[{target:'V-KYR', share:100}],
+    allocReason:'Whole stay attributable to the Kyrenia Star drydock at Hudong-Zhonghua.',
+    lines:[
+      L('客房费 3晚','Room charge, 3 nights', 3, 780, 2340, 'Accommodation', 6, {orig:.95,total:.96}),
+      L('迷你吧 青岛啤酒','Minibar — Tsingtao beer', 2, 45, 90, 'Alcohol', 6, {orig:.88,total:.9}),
+      L('洗衣服务','Laundry service', 1, 120, 120, 'Laundry', 6, {orig:.94,total:.95}),
+      L('商务中心 打印','Business centre — printing', 1, 35, 35, 'Supplies', 6, {orig:.9,total:.93}),
+      L('早餐 3份','Breakfast, 3 servings', 3, 88, 264, 'Meals', 6, {orig:.92,total:.94})
+    ]
+  }
+});
+FIXTURES.push({
+  id:'RCP-03', label:'Taverna — Piraeus', script:'Greek (el-GR)', currency:'EUR',
+  purpose:'VAT itemised at two rates — the recoverable-VAT figure',
+  doc:{
+    alt:'Greek taverna receipt from Piraeus with itemised VAT',
+    head:[{t:'Ο ΜΙΚΡΟΛΙΜΑΝΟΣ'},
+          {t:'ΤΑΒΕΡΝΑ · ΑΚΤΗ ΚΟΥΜΟΥΝΔΟΥΡΟΥ 48', size:7.2},
+          {t:'ΠΕΙΡΑΙΑΣ 185 33', size:7.2}],
+    info:[['ΑΦΜ 099384712','ΔΟΥ ΠΕΙΡΑΙΑ'],['ΑΠΟΔΕΙΞΗ','4471'],
+          ['2026-08-25','13:22'],['ΑΤΟΜΑ','1']],
+    items:[
+      {d:'ΧΩΡΙΑΤΙΚΗ ΣΑΛΑΤΑ      Α', a:'9.50'},
+      {d:'ΨΗΤΟ ΞΙΦΙΑΣ           Α', a:'22.00'},
+      {d:'ΠΑΤΑΤΕΣ ΤΗΓΑΝΗΤΕΣ     Α', a:'5.00'},
+      {d:'ΚΡΑΣΙ ΧΥΜΑ 500ML      Β', a:'8.00'},
+      {d:'ΝΕΡΟ 1L               Α', a:'1.50'},
+      {d:'ΚΑΦΕΣ ΕΛΛΗΝΙΚΟΣ  x2   Β', a:'5.00'}],
+    totals:[['ΚΑΘΑΡΗ ΑΞΙΑ  Α 13%','33.63'],['ΦΠΑ 13%','4.37'],
+            ['ΚΑΘΑΡΗ ΑΞΙΑ  Β 24%','10.48'],['ΦΠΑ 24%','2.52'],
+            ['ΣΥΝΟΛΟ EUR','51.00',true]],
+    foot:['ΦΠΑ ΣΥΝΟΛΟ 6.89','ΕΥΧΑΡΙΣΤΟΥΜΕ']
+  },
+  ext:{
+    merchant:['Ταβέρνα Ο Μικρολίμανος', .97],
+    address:['Ακτή Κουμουνδούρου 48, Πειραιάς 185 33', .94],
+    country:['Greece', .99],
+    docNo:['4471', .96],
+    date:['2026-08-25', .97], time:['13:22', .95],
+    currency:['EUR', .99], heads:[1, .93],
+    taxInclusive:true, itemisedInvoice:true,
+    clientEntertainment:false, entertainmentNote:'',
+    docTotal:[51, .98],
+    alloc:[{target:'V-AEG', share:100}],
+    allocReason:'Lunch during the Aegean Trader crew handover at Piraeus.',
+    lines:[
+      L('ΧΩΡΙΑΤΙΚΗ ΣΑΛΑΤΑ','Village salad', 1, 9.5, 9.5, 'Meals', 13, {orig:.97,total:.98}),
+      L('ΨΗΤΟ ΞΙΦΙΑΣ','Grilled swordfish', 1, 22, 22, 'Meals', 13, {orig:.96,total:.98}),
+      L('ΠΑΤΑΤΕΣ ΤΗΓΑΝΗΤΕΣ','Fried potatoes', 1, 5, 5, 'Meals', 13, {orig:.97,total:.98}),
+      L('ΚΡΑΣΙ ΧΥΜΑ 500ML','House wine, 500ml', 1, 8, 8, 'Alcohol', 24, {orig:.95,total:.97}),
+      L('ΝΕΡΟ 1L','Water, 1L', 1, 1.5, 1.5, 'Meals', 13, {orig:.98,total:.98}),
+      L('ΚΑΦΕΣ ΕΛΛΗΝΙΚΟΣ','Greek coffee', 2, 2.5, 5, 'Meals', 24, {orig:.94,total:.96})
+    ]
+  }
+});
+
+FIXTURES.push({
+  id:'RCP-04', label:'Taxi, handwritten — Piraeus', script:'Greek (el-GR), handwritten',
+  currency:'EUR',
+  purpose:'Low-confidence extraction and the human-correction path',
+  doc:{
+    alt:'Faded handwritten Greek taxi receipt',
+    aged:true, tilt:-1.4, face:HAND_FACE, headFace:HAND_FACE, itemFace:HAND_FACE,
+    head:[{t:'ΤΑΞΙ ΠΕΙΡΑΙΑ', size:13, op:.8},
+          {t:'ΑΡ. ΑΔΕΙΑΣ  ΠΕ—4?81', size:9, op:.55}],
+    info:[['ΗΜ/ΝΙΑ  25/08/2?','—']],
+    items:[
+      {d:'ΚΟΜΙΣΤΡΟ ΠΕΙΡΑΙΑΣ—ΑΕΡΟΔΡ.', a:'34,00', size:10, op:.62},
+      {d:'ΔΙΟΔΙΑ', a:'2,80', size:10, op:.7}],
+    totals:[['ΣΥΝΟΛΟ','36,80',true,.68]],
+    foot:['(υπογραφή)']
+  },
+  ext:{
+    merchant:['ΤΑΞΙ ΠΕΙΡΑΙΑ (licence ΠΕ-4?81 — partly illegible)', .38],
+    address:['Πειραιάς, Greece', .55],
+    country:['Greece', .9],
+    docNo:['— none printed —', .3],
+    date:['2026-08-25', .52], time:['', .2],
+    currency:['EUR', .95], heads:[1, .6],
+    taxInclusive:true, itemisedInvoice:false,
+    clientEntertainment:false, entertainmentNote:'',
+    docTotal:[86.8, .41],
+    alloc:[{target:'V-AEG', share:70},{target:'CC-LIM', share:30}],
+    allocReason:'Airport transfer at the end of the Piraeus leg; 30% carried by the Limassol office as return-travel overhead.',
+    lines:[
+      L('ΚΟΜΙΣΤΡΟ ΠΕΙΡΑΙΑΣ—ΑΕΡΟΔΡ.','Fare, Piraeus to airport', 1, 84, 84,
+        'Ground transport', 0, {orig:.58,total:.41}),
+      L('ΔΙΟΔΙΑ','Tolls', 1, 2.8, 2.8, 'Ground transport', 0, {orig:.62,total:.55})
+    ],
+    lowConfNote:'Handwritten comma decimals and a smudged total. The document reads 34,00 — the extraction proposed 84.00. Correct it in step 5 and both values are kept.'
+  }
+});
+</script>
+<script>
+/* ══ helpers ════════════════════════════════════════════════════════ */
+const DP = {KRW:0, JPY:0};
+function dp(cur){ return DP[cur] === undefined ? 2 : DP[cur]; }
+function money(n, cur){
+  const d = dp(cur);
+  return (Number(n) || 0).toLocaleString('en-GB', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function eur(n){ return money(n, BASE); }
+function F(pair){
+  const v = Array.isArray(pair) ? pair[0] : pair;
+  const c = Array.isArray(pair) ? (pair[1] === undefined ? .99 : pair[1]) : .99;
+  return {ai:v, value:v, conf:c, edited:false};
+}
+function setField(f, v){
+  if (String(f.value) === String(v)) return false;
+  f.value = v;
+  f.edited = String(v) !== String(f.ai);
+  return true;
+}
+function targetById(id){
+  return VESSELS.find(v => v.id === id) || CENTRES.find(c => c.id === id) || null;
+}
+function ownerOfTarget(id){
+  const v = VESSELS.find(x => x.id === id);
+  return v ? OWNERS.find(o => o.id === v.owner) : null;
+}
+function ruleById(id){ return state.policy.find(r => r.id === id); }
+function fxFor(receipt){
+  if (receipt.fxOverride){
+    return {rate:Number(receipt.fxOverride.rate), date:receipt.fxOverride.date,
+            source:'Manual override — card settlement rate', overridden:true};
+  }
+  const cur = receipt.currency.value, d = receipt.date.value;
+  if (cur === BASE) return {rate:1, date:d, source:'Base currency — no conversion applied', overridden:false};
+  const hit = FX_TABLE[cur + '|' + d];
+  if (hit) return {rate:hit, date:d, source:FX_SOURCE, overridden:false};
+  const fallback = Object.keys(FX_TABLE).find(k => k.indexOf(cur + '|') === 0);
+  return fallback
+    ? {rate:FX_TABLE[fallback], date:fallback.split('|')[1], source:FX_SOURCE + ' — nearest available date', overridden:false}
+    : {rate:null, date:null, source:'No fixture rate held for ' + cur + ' on ' + d, overridden:false};
+}
+function daysSince(iso){
+  return Math.round((Date.parse(TODAY) - Date.parse(iso)) / 86400000);
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._h); toast._h = setTimeout(() => t.classList.remove('on'), 2200);
+}
+function logAudit(receiptId, field, from, to){
+  state.audit.push({receipt:receiptId, field:field, from:from, to:to,
+    at:new Date().toISOString().slice(11,19) + ' local'});
+}
+
+/* build a live receipt from a fixture's recorded extraction */
+function instantiate(fx){
+  const e = fx.ext;
+  return {
+    id:fx.id, fixture:fx.id, label:fx.label, script:fx.script, purpose:fx.purpose,
+    merchant:F(e.merchant), address:F(e.address), country:F(e.country), docNo:F(e.docNo),
+    date:F(e.date), time:F(e.time), currency:F(e.currency), heads:F(e.heads),
+    docTotal:F(e.docTotal),
+    taxInclusive:e.taxInclusive, itemisedInvoice:e.itemisedInvoice,
+    clientEntertainment:e.clientEntertainment, entertainmentNote:e.entertainmentNote || '',
+    allocReason:e.allocReason || '', lowConfNote:e.lowConfNote || '',
+    confirmed:false,
+    fxOverride:null,
+    alloc:e.alloc.map(a => Object.assign({}, a)),
+    lines:e.lines.map((l, i) => ({
+      id:fx.id + '-L' + (i + 1),
+      orig:F([l.orig, l.conf.orig]), gloss:F([l.gloss, l.conf.gloss === undefined ? (l.conf.orig || .95) : l.conf.gloss]),
+      qty:F([l.qty, l.conf.qty === undefined ? .95 : l.conf.qty]),
+      unit:F([l.unit, l.conf.unit === undefined ? (l.conf.total || .95) : l.conf.unit]),
+      total:F([l.total, l.conf.total]),
+      cat:F([l.cat, l.conf.cat === undefined ? .93 : l.conf.cat]),
+      taxRate:F([l.taxRate, .95]),
+      note:'', alloc:null
+    }))
+  };
+}
+/* ══ policy engine ══════════════════════════════════════════════════
+   Rules are read from state.policy at evaluation time, so toggling one
+   recomputes every claim total without touching this function. */
+function evaluateClaim(){
+  const rs = state.claim.receipts;
+
+  /* claim-wide meal totals per transaction date, for the daily cap */
+  const mealsByDate = {};
+  rs.forEach(r => {
+    const fx = fxFor(r);
+    if (fx.rate === null) return;
+    r.lines.forEach(l => {
+      if (l.cat.value !== 'Meals') return;
+      const d = r.date.value;
+      mealsByDate[d] = (mealsByDate[d] || 0) + Number(l.total.value) * fx.rate;
+    });
+  });
+
+  rs.forEach(r => {
+    const fx = fxFor(r);
+    r._fx = fx;
+    r.lines.forEach(l => {
+      const base = fx.rate === null ? 0 : Number(l.total.value) * fx.rate;
+      const rules = [];
+      let status = 'reimbursable';
+      const flag = eff => { if (status !== 'excluded') status = eff; };
+
+      if (l.cat.value === 'Alcohol'){
+        const p1 = ruleById('POL-001'), p2 = ruleById('POL-002');
+        if (p1.enabled){
+          if (p2.enabled && r.clientEntertainment){
+            rules.push({id:'POL-002', effect:'allowed',
+              detail:'Client entertainment attested on this document — POL-001 overridden'});
+          } else {
+            status = 'excluded';
+            rules.push({id:'POL-001', effect:'excluded',
+              detail:p2.enabled
+                ? 'Client entertainment is not attested on this document, so the exception does not apply'
+                : 'Alcohol is not reimbursable under the active policy set'});
+          }
+        }
+      }
+
+      if (l.cat.value === 'Meals'){
+        const p3 = ruleById('POL-003');
+        const heads = Math.max(1, Number(r.heads.value) || 1);
+        if (p3.enabled && base / heads > p3.threshold){
+          flag('review');
+          rules.push({id:'POL-003', effect:'review',
+            detail:'EUR ' + eur(base / heads) + ' per head across ' + heads
+              + ' — cap is EUR ' + p3.threshold});
+        }
+        const p4 = ruleById('POL-004');
+        const dayTotal = mealsByDate[r.date.value] || 0;
+        if (p4.enabled && dayTotal > p4.threshold){
+          flag('review');
+          rules.push({id:'POL-004', effect:'review',
+            detail:'EUR ' + eur(dayTotal) + ' of meals claimed on ' + r.date.value
+              + ' — cap is EUR ' + p4.threshold});
+        }
+      }
+
+      if (l.cat.value === 'Accommodation'){
+        const p5 = ruleById('POL-005');
+        if (p5.enabled && base > p5.threshold){
+          if (r.itemisedInvoice){
+            rules.push({id:'POL-005', effect:'satisfied',
+              detail:'Itemised invoice attested — evidence requirement met'});
+          } else {
+            flag('review');
+            rules.push({id:'POL-005', effect:'review',
+              detail:'EUR ' + eur(base) + ' exceeds EUR ' + p5.threshold
+                + ' and no itemised invoice is attested'});
+          }
+        }
+      }
+
+      const minConf = Math.min(l.total.conf, l.orig.conf, l.qty.conf);
+      const humanFixed = l.total.edited || l.orig.edited || l.qty.edited;
+      if (minConf < CONF_FLOOR && !humanFixed){
+        flag('review');
+        rules.push({id:'SYS-CONF', effect:'review',
+          detail:'Extraction confidence ' + Math.round(minConf * 100)
+            + '% is below the ' + Math.round(CONF_FLOOR * 100) + '% floor — needs human confirmation'});
+      }
+
+      l._base = base;
+      l._status = status;
+      l._rules = rules;
+      l._tax = Number(l.taxRate.value) > 0
+        ? base * Number(l.taxRate.value) / (100 + Number(l.taxRate.value)) : 0;
+      l._taxOrig = Number(l.taxRate.value) > 0
+        ? Number(l.total.value) * Number(l.taxRate.value) / (100 + Number(l.taxRate.value)) : 0;
+      l._minConf = minConf;
+    });
+  });
+}
+
+function receiptTotals(r){
+  let gross = 0, excluded = 0, vat = 0, review = 0;
+  r.lines.forEach(l => {
+    gross += l._base;
+    if (l._status === 'excluded') excluded += l._base;
+    else { vat += l._tax; if (l._status === 'review') review += l._base; }
+  });
+  return {gross:gross, excluded:excluded, reimbursable:gross - excluded, vat:vat, review:review};
+}
+
+function claimTotals(){
+  const t = {gross:0, excluded:0, reimbursable:0, vat:0, review:0, byTarget:{}, byOwner:{}};
+  state.claim.receipts.forEach(r => {
+    const rt = receiptTotals(r);
+    t.gross += rt.gross; t.excluded += rt.excluded;
+    t.reimbursable += rt.reimbursable; t.vat += rt.vat; t.review += rt.review;
+    r.lines.forEach(l => {
+      if (l._status === 'excluded') return;
+      allocFor(r, l).forEach(a => {
+        const amt = l._base * (Number(a.share) || 0) / 100;
+        t.byTarget[a.target] = (t.byTarget[a.target] || 0) + amt;
+        const o = ownerOfTarget(a.target);
+        const key = o ? o.id : 'CC';
+        t.byOwner[key] = (t.byOwner[key] || 0) + amt;
+      });
+    });
+  });
+  return t;
+}
+
+function allocFor(r, l){ return (l.alloc && l.alloc.length) ? l.alloc : r.alloc; }
+function allocSum(a){ return a.reduce((s, x) => s + (Number(x.share) || 0), 0); }
+function allocValid(a){
+  return a.length > 0 && a.every(x => x.target) && Math.abs(allocSum(a) - 100) < 0.01;
+}
+function receiptAllocValid(r){
+  if (!allocValid(r.alloc)) return false;
+  return r.lines.every(l => !l.alloc || !l.alloc.length || allocValid(l.alloc));
+}
+function ruleBite(id){
+  let lines = 0, amount = 0, met = 0;
+  state.claim.receipts.forEach(r => r.lines.forEach(l => {
+    (l._rules || []).forEach(x => {
+      if (x.id !== id) return;
+      if (x.effect === 'excluded' || x.effect === 'review'){ lines++; amount += l._base; }
+      else met++;
+    });
+  }));
+  return {lines:lines, amount:amount, met:met};
+}
+/* ══ review — shared field widgets ══════════════════════════════════ */
+function confBar(conf){
+  const pct = Math.round(conf * 100);
+  return '<span class="conf ' + (conf < CONF_FLOOR ? 'low' : '') + '" title="Extraction confidence">'
+    + '<span class="bar"><i style="width:' + pct + '%"></i></span>' + pct + '%</span>';
+}
+function editedNote(f, cur){
+  if (!f.edited) return '';
+  const a = cur ? money(f.ai, cur) : esc(String(f.ai));
+  const v = cur ? money(f.value, cur) : esc(String(f.value));
+  return '<span class="edited"><span class="badge outline" style="padding:0 6px">edited</span>'
+    + 'AI read <s>' + a + '</s> → <b style="font-weight:600">' + v + '</b></span>';
+}
+function fieldInput(rid, path, f, o){
+  o = o || {};
+  return '<input class="input sm ' + (o.mono ? 'mono' : '') + '"'
+    + (o.type ? ' type="' + o.type + '"' : '')
+    + (o.step ? ' step="' + o.step + '"' : '')
+    + ' data-edit="' + path + '" data-rcp="' + rid + '"'
+    + (o.lid ? ' data-line="' + o.lid + '"' : '')
+    + ' value="' + esc(String(f.value)) + '"'
+    + (o.style ? ' style="' + o.style + '"' : '') + '>';
+}
+function catSelect(rid, lid, f){
+  return '<select class="select sm" data-edit="cat" data-rcp="' + rid + '" data-line="' + lid + '">'
+    + CATEGORIES.map(c => '<option ' + (c === f.value ? 'selected' : '') + '>' + c + '</option>').join('')
+    + '</select>';
+}
+function statusBadge(st){
+  if (st === 'excluded') return '<span class="badge solid">Excluded</span>';
+  if (st === 'review')   return '<span class="badge striped">Needs review</span>';
+  return '<span class="badge outline dot">Reimbursable</span>';
+}
+
+/* ══ the reading sequence ═══════════════════════════════════════════ */
+function runReading(fixture, fast, done){
+  const stages = [
+    'Reading document image',
+    'Detecting language — ' + fixture.script,
+    'Extracting line items',
+    'Translating to English',
+    'Normalising categories',
+    'Applying policy set'
+  ];
+  const ov = document.getElementById('overlay');
+  const ul = document.getElementById('readStages');
+  const bar = document.getElementById('readBar');
+  document.getElementById('readTitle').textContent = 'AI is reading ' + fixture.id;
+  document.getElementById('readSub').textContent = fixture.label + ' · ' + fixture.currency;
+  ov.classList.add('on');
+  let i = 0;
+  const step = () => {
+    ul.innerHTML = stages.map((s, k) =>
+      '<li class="' + (k < i ? 'done' : k === i ? 'doing' : '') + '">'
+      + '<span class="m">' + (k < i ? '✓' : k === i ? '<span class="spin"></span>' : '·') + '</span>'
+      + '<span>' + s + '</span></li>').join('');
+    bar.style.width = Math.round(i / stages.length * 100) + '%';
+    i++;
+    if (i <= stages.length) setTimeout(step, fast ? 130 : 330);
+    else {
+      bar.style.width = '100%';
+      setTimeout(() => { ov.classList.remove('on'); done(); }, fast ? 90 : 220);
+    }
+  };
+  step();
+}
+
+function capture(fixtureId, fast, then){
+  const fx = FIXTURES.find(f => f.id === fixtureId);
+  if (!fx) return;
+  if (state.claim.receipts.some(r => r.id === fx.id)){
+    state.activeReceipt = fx.id;
+    afterCapture();
+    return;
+  }
+  runReading(fx, fast, () => {
+    state.claim.receipts.push(instantiate(fx));
+    state.claim.receipts.sort((a, b) => a.id.localeCompare(b.id));
+    state.activeReceipt = fx.id;
+    if (then) then();
+    else { afterCapture(); toast(fx.id + ' read — ' + fx.ext.lines.length + ' line items'); }
+  });
+}
+function captureAll(){
+  const pending = FIXTURES.map(f => f.id).filter(id => !state.claim.receipts.some(r => r.id === id));
+  if (!pending.length){ state.activeReceipt = FIXTURES[0].id; afterCapture(); return; }
+  const next = () => {
+    const id = pending.shift();
+    if (!id){
+      state.activeReceipt = FIXTURES[0].id;
+      afterCapture();
+      toast('All four documents read');
+      return;
+    }
+    capture(id, true, next);
+  };
+  next();
+}
+
+/* ══ mutation helpers ═══════════════════════════════════════════════ */
+function receipt(id){ return state.claim.receipts.find(r => r.id === id); }
+function lineOf(r, lid){ return r.lines.find(l => l.id === lid); }
+function scopeOf(rid, lid){
+  const r = receipt(rid);
+  if (!r) return null;
+  if (!lid) return {r:r, list:r.alloc, amt:receiptTotals(r).reimbursable};
+  const l = lineOf(r, lid);
+  if (!l.alloc) l.alloc = [];
+  return {r:r, l:l, list:l.alloc, amt:l._base};
+}
+function balance(list){
+  if (!list.length) return;
+  const rest = list.slice(0, -1).reduce((s, x) => s + (Number(x.share) || 0), 0);
+  list[list.length - 1].share = Math.round((100 - rest) * 10) / 10;
+}
+function unusedTarget(list){
+  const all = VESSELS.map(v => v.id).concat(CENTRES.map(c => c.id));
+  return all.find(id => !list.some(a => a.target === id)) || all[0];
+}
+
+/* ══ icons ══════════════════════════════════════════════════════════
+   Lucide-style line icons, inlined. 24px viewBox, 1.5px stroke,
+   currentColor, rounded caps. No glyphs, no emoji, no icon font. */
+const ICONS = {
+  receipt:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h4"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  split:'<path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.17-2.83L3 3"/><path d="M21 3l-7.83 7.87A4 4 0 0 0 12 13.7v.3"/>',
+  ledger:'<path d="M17 12H3"/><path d="m11 18 6-6-6-6"/><path d="M21 5v14"/>',
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  ask:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+  ship:'<path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.4 12 22 14l-2 5"/><path d="M4.6 12 2 14l2 5"/><path d="M12 2v3"/><path d="M4.6 12h14.8L12 5Z"/>'
+};
+function icon(name, size){
+  const p = ICONS[name];
+  if (!p) return '';
+  const s = size || 18;
+  return '<svg class="ic" viewBox="0 0 24 24" width="' + s + '" height="' + s + '"'
+    + ' fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"'
+    + ' stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+}
+</script>
+<script>
+/* the document, shown alongside every step of the review. */
+function docColumn(r){
+  const fx = r._fx;
+  const fixture = FIXTURES.find(f => f.id === r.fixture);
+
+  /* The merchant, date and total are legible on the receipt itself and
+     restated in the table beside it, so they are not repeated here. The
+     rate and its effective date stay, because a converted figure is not
+     auditable without them. */
+  return '<div class="doc-col">'
+    + '<div class="doc-frame">' + receiptSvg(fixture.doc) + '</div>'
+    + '<div class="doc-meta"><span>' + r.id + '</span><span>' + r.script + '</span></div>'
+    + '<p class="fx-note">'
+    + (fx.rate === null
+        ? fx.source
+        : r.currency.value === BASE
+          ? 'Already in ' + BASE + ', so no conversion applies.'
+          : (fx.overridden
+              ? 'Converted at the card settlement rate of '
+                + '<input class="rate-in" type="number" step="0.000001" data-fxrate="'
+                + r.id + '" value="' + fx.rate + '">, entered by hand. '
+                + '<button type="button" class="lnk" data-fx="' + r.id + '">'
+                + 'Restore the published rate</button>'
+              : 'Converted at ' + fx.rate.toFixed(6) + ', the published rate on ' + fx.date + '. '
+                + '<button type="button" class="lnk" data-fx="' + r.id + '">'
+                + 'Use the card settlement rate</button>'))
+    + '</p></div>';
+}
+/* One row per line: what was read, and what policy did to it, together.
+   These used to be two stacked tables listing the same four lines. */
+function ledgerCard(r){
+  const cur = r.currency.value;
+  const t = receiptTotals(r);
+
+  const rows = r.lines.map(l =>
+    '<tr data-st="' + l._status + '"><td class="st"></td>'
+    + '<td><div class="orig">' + esc(l.orig.value) + '</div>'
+    + '<div class="gloss">' + esc(l.gloss.value) + '</div>'
+    + (l._minConf < CONF_FLOOR
+        ? '<div class="edited"><span class="badge striped" style="padding:0 6px">'
+          + Math.round(l._minConf * 100) + '% sure</span>worth a look</div>' : '')
+    + editedNote(l.total, cur)
+    + (l._rules || []).map(x =>
+        '<span class="rule-line ' + (x.effect === 'satisfied' ? 'satisfied' : '') + '">'
+        + '<span class="rid">' + x.id + '</span><span>' + x.detail + '</span></span>').join('')
+    + '</td>'
+    + '<td class="num r" style="width:132px">'
+    + fieldInput(r.id, 'total', l.total, {lid:l.id, mono:true, type:'number', step:'0.01', style:'text-align:right;padding:0 12px'})
+    + '<div class="muted" style="font-size:12px;margin-top:3px">' + cur
+    + (Number(l.qty.value) > 1 ? ', ' + l.qty.value + '×' : '') + '</div></td>'
+    + '<td class="num r amt" style="width:82px">' + eur(l._base) + '</td>'
+    + '<td style="width:140px">' + catSelect(r.id, l.id, l.cat)
+    + (l.cat.edited ? '<div class="edited">was <s>' + esc(String(l.cat.ai)) + '</s></div>' : '')
+    + '</td>'
+    + '<td style="width:116px">' + statusBadge(l._status) + '</td></tr>').join('');
+
+  return '<div class="card"><header class="ruled">'
+    + '<div><h3>' + r.lines.length + ' line items, ' + r.script + '</h3>'
+    + '<p class="desc">The original text sits beside the English so the claim ties back to the paper. '
+    + 'Amounts and categories are editable; the rule behind any exclusion is named on its line.</p>'
+    + '</div></header>'
+    + (r.lowConfNote
+        ? '<div style="padding:14px 18px 0"><div class="callout">' + r.lowConfNote + '</div></div>'
+        : '')
+    + '<div class="body tight"><div class="tbl-wrap"><table class="tbl ledger">'
+    + '<thead><tr><th class="st"></th><th>Item</th>'
+    + '<th class="r">Amount</th><th class="r">' + BASE + '</th>'
+    + '<th>Category</th><th>Outcome</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '<tfoot><tr><td class="st"></td><td>Payable on this document</td>'
+    + '<td class="num r">' + money(r.lines.reduce((s, l) => s + Number(l.total.value), 0), cur) + '</td>'
+    + '<td class="num r">' + eur(t.reimbursable) + '</td>'
+    + '<td colspan="2"><span class="muted" style="font-weight:400;font-size:12px">'
+    + eur(t.gross) + ' less ' + eur(t.excluded) + ' excluded</span></td>'
+    + '</tr></tfoot></table></div></div></div>';
+}
+const RULE_TYPE_LABEL = {
+  category_exclusion:'Category exclusion', allowed_with_condition:'Allowed with condition',
+  per_item_cap:'Per-item cap', daily_cap:'Daily cap', required_evidence:'Required evidence'
+};
+function policyCard(){
+  const rows = state.policy.map(p => {
+    const bite = ruleBite(p.id);
+    return '<div class="rule"><span class="rid">' + p.id + '</span>'
+      + '<div><div class="t">' + p.title + '</div>'
+      + '<div class="d"><span class="type">' + RULE_TYPE_LABEL[p.type] + '</span>'
+      + (p.threshold ? ' · threshold EUR ' + p.threshold : '')
+      + ' — ' + p.detail + '</div></div>'
+      + '<div class="row" style="gap:12px;flex-wrap:nowrap">'
+      + '<span class="bite">' + (bite.lines
+          ? bite.lines + ' line' + (bite.lines === 1 ? '' : 's') + '<br>EUR ' + eur(bite.amount)
+          : bite.met
+            ? bite.met + ' line' + (bite.met === 1 ? '' : 's') + '<br>satisfied'
+            : '<span style="color:var(--subtle-foreground)">no effect</span>') + '</span>'
+      + '<button type="button" class="switch" role="switch" data-rule="' + p.id + '"'
+      + ' aria-checked="' + p.enabled + '" aria-label="' + p.title + '"></button>'
+      + '</div></div>';
+  }).join('');
+
+  return '<div class="card"><header class="ruled">'
+    + '<div><h3>Policy set</h3>'
+    + '<p class="desc">Toggle a rule and every total moves. Nothing is dropped silently — an excluded '
+    + 'line stays on the claim with the rule that excluded it named.</p></div>'
+    + '<span class="badge outline">' + state.policy.filter(p => p.enabled).length
+    + ' of ' + state.policy.length + ' on</span></header>'
+    + '<div class="body"><div class="rules">' + rows + '</div></div></div>';
+}
+
+function notesCard(r){
+  const flagged = r.lines.filter(l => l._status !== 'reimbursable');
+  if (!flagged.length){
+    return '<div class="card"><header><div><h3>Notes</h3>'
+      + '<p class="desc">No line on this document is excluded or flagged, so there is nothing to explain.</p>'
+      + '</div></header></div>';
+  }
+  return '<div class="card"><header class="ruled"><div><h3>Notes on '
+    + flagged.length + ' line' + (flagged.length === 1 ? '' : 's') + '</h3>'
+    + '<p class="desc">Add context for whoever approves this.</p></div></header>'
+    + '<div class="body" style="display:grid;gap:13px">'
+    + flagged.map(l =>
+        '<div><div class="row" style="justify-content:space-between;gap:10px">'
+        + '<span style="font-size:13px">' + esc(l.gloss.value) + '</span>'
+        + statusBadge(l._status) + '</div>'
+        + '<input class="input sm" style="margin-top:6px" placeholder="Add a note…"'
+        + ' data-edit="note" data-rcp="' + r.id + '" data-line="' + l.id + '"'
+        + ' value="' + esc(l.note) + '"></div>').join('')
+    + '</div></div>';
+}
+
+function allocEditor(r, line){
+  const list = line ? (line.alloc || []) : r.alloc;
+  const scopeAmt = line ? line._base : receiptTotals(r).reimbursable;
+  const sum = allocSum(list);
+  const ok = allocValid(list);
+  const attr = line ? ' data-line="' + line.id + '"' : '';
+
+  const rows = list.map((a, i) => {
+    const tg = targetById(a.target);
+    const owner = ownerOfTarget(a.target);
+    return '<div>'
+      + '<div class="alloc-row">'
+      + '<select class="select sm" data-alloc="target" data-rcp="' + r.id + '"' + attr + ' data-i="' + i + '">'
+      + '<optgroup label="Vessels">' + VESSELS.map(v =>
+          '<option value="' + v.id + '"' + (v.id === a.target ? ' selected' : '') + '>'
+          + v.name + '</option>').join('') + '</optgroup>'
+      + '<optgroup label="Cost centres">' + CENTRES.map(c =>
+          '<option value="' + c.id + '"' + (c.id === a.target ? ' selected' : '') + '>'
+          + c.name + '</option>').join('') + '</optgroup></select>'
+      + '<input class="input sm mono" type="number" step="0.5" style="text-align:right"'
+      + ' data-alloc="share" data-rcp="' + r.id + '"' + attr + ' data-i="' + i + '" value="' + a.share + '">'
+      + '<input class="input sm mono" type="number" step="0.01" style="text-align:right"'
+      + ' data-alloc="amount" data-rcp="' + r.id + '"' + attr + ' data-i="' + i + '"'
+      + ' value="' + (scopeAmt * (Number(a.share) || 0) / 100).toFixed(2) + '">'
+      + '<button class="btn icon xs" type="button" data-allocdel="' + i + '" data-rcp="' + r.id + '"' + attr
+      + ' aria-label="Remove allocation row">' + icon('x',15) + '</button>'
+      + '</div>'
+      + '<div class="owner">' + (tg ? tg.type : '')
+      + (owner ? ' · ' + owner.name + ' (' + owner.id + ')' : ' · not recharged to an owner')
+      + (tg && tg.imo ? ' · IMO ' + tg.imo : '') + '</div></div>';
+  }).join('');
+
+  const meter = '<div class="alloc-meter">'
+    + list.map(a => '<i style="width:' + Math.max(0, Math.min(100, Number(a.share) || 0)) + '%"></i>').join('')
+    + '</div>';
+
+  return '<div style="display:grid;gap:9px">'
+    + '<div class="alloc-row" style="align-items:end">'
+    + '<span class="label">Vessel or cost centre</span><span class="label" style="text-align:right">Share %</span>'
+    + '<span class="label" style="text-align:right">EUR</span><span></span></div>'
+    + '<div class="alloc-rows">' + rows + '</div>'
+    + meter
+    + '<div class="alloc-state ' + (ok ? '' : 'bad') + '">'
+    + (ok
+        ? 'Allocated 100.0% of EUR ' + eur(scopeAmt) + ' — balanced.'
+        : (sum > 100
+            ? 'Over-allocated by ' + (sum - 100).toFixed(1) + '% — EUR '
+              + eur(scopeAmt * (sum - 100) / 100) + ' more than the reimbursable total.'
+            : 'Unallocated: ' + (100 - sum).toFixed(1) + '% — EUR '
+              + eur(scopeAmt * (100 - sum) / 100) + ' still to assign.'))
+    + '</div>'
+    + '<div class="row" style="gap:7px">'
+    + '<button class="btn xs" type="button" data-allocadd="1" data-rcp="' + r.id + '"' + attr + '>Add a split</button>'
+    + '<button class="btn xs" type="button" data-allocbal="1" data-rcp="' + r.id + '"' + attr + '>Balance to 100%</button>'
+    + (line ? '<button class="btn xs" type="button" data-allocclear="1" data-rcp="' + r.id + '"' + attr
+              + '>Use the document split</button>' : '')
+    + '</div></div>';
+}
+
+function allocCard(r){
+  const lineSplits = r.lines.filter(l => l.alloc && l.alloc.length);
+  const splittable = r.lines.filter(l => l._status !== 'excluded');
+  return '<div class="card"><header class="ruled">'
+    + '<div><h3>Who carries this cost</h3>'
+    + '<p class="desc">A vessel budget, recharged to that owner — the part generic expense software has '
+    + 'no concept of.</p></div>'
+    + (receiptAllocValid(r) ? '<span class="badge outline dot">Balanced</span>'
+                            : '<span class="badge striped">Unbalanced</span>') + '</header>'
+    + '<div class="body" style="display:grid;gap:16px">'
+    + (r.allocReason ? '<div class="callout">' + r.allocReason + '</div>' : '')
+    + allocEditor(r, null)
+    + (lineSplits.length
+        ? '<hr class="sep">' + lineSplits.map(l =>
+            '<div><span class="label" style="display:block;margin-bottom:9px">'
+            + esc(l.gloss.value) + ' — EUR ' + eur(l._base) + ', split on its own</span>'
+            + allocEditor(r, l) + '</div>').join('')
+        : '')
+    + '<hr class="sep">'
+    + '<div><span class="label" style="display:block;margin-bottom:8px">Split one line differently</span>'
+    + '<div class="row" style="gap:7px">'
+    + splittable.map(l => '<button class="btn xs" type="button" data-splitline="' + l.id
+        + '" data-rcp="' + r.id + '">'
+        + ((l.alloc && l.alloc.length) ? 'Undo ' : '') + esc(l.gloss.value.split(',')[0])
+        + '</button>').join('')
+    + '</div></div>'
+    + '</div></div>';
+}
+function outcomeCard(r){
+  const t = receiptTotals(r);
+  const rows = r.lines.map(l =>
+    '<tr data-st="' + l._status + '"><td class="st"></td>'
+    + '<td><div>' + esc(l.gloss.value) + '</div>'
+    + (l._rules || []).map(x =>
+        '<span class="rule-line ' + (x.effect === 'satisfied' ? 'satisfied' : '') + '">'
+        + '<span class="rid">' + x.id + '</span><span>' + x.detail + '</span></span>').join('')
+    + '</td>'
+    + '<td class="num r amt" style="width:82px">' + eur(l._base) + '</td>'
+    + '<td style="width:116px">' + statusBadge(l._status) + '</td></tr>').join('');
+  return '<div class="card"><header class="ruled"><div><h3>What that does to this document</h3>'
+    + '<p class="desc">Toggle a rule above and this changes.</p></div></header>'
+    + '<div class="body tight"><div class="tbl-wrap"><table class="tbl ledger">'
+    + '<thead><tr><th class="st"></th><th>Item</th><th class="r">EUR</th>'
+    + '<th>Outcome</th></tr></thead><tbody>' + rows + '</tbody>'
+    + '<tfoot><tr><td class="st"></td><td>Reimbursable</td>'
+    + '<td class="num r">' + eur(t.reimbursable) + '</td>'
+    + '<td><span class="muted" style="font-weight:400;font-size:12px">less '
+    + eur(t.excluded) + '</span></td></tr></tfoot></table></div></div></div>';
+}
+
+function buildPayload(){
+  const c = state.claim, t = claimTotals();
+  const lines = [];
+  c.receipts.forEach(r => {
+    const fx = r._fx;
+    r.lines.forEach(l => {
+      const editedFields = ['orig','gloss','qty','unit','total','cat','taxRate']
+        .filter(k => l[k].edited);
+      const alloc = l._status === 'excluded' ? [] : allocFor(r, l).map(a => {
+        const tg = targetById(a.target), o = ownerOfTarget(a.target);
+        return {
+          cost_object_id:a.target,
+          cost_object:tg ? tg.name : a.target,
+          imo:tg && tg.imo ? tg.imo : null,
+          owner_account:o ? o.id : null,
+          owner_name:o ? o.name : null,
+          management_agreement:o ? o.agreement : null,
+          share_pct:Number(a.share),
+          amount_base:round2(l._base * Number(a.share) / 100)
+        };
+      });
+      lines.push({
+        line_id:l.id,
+        source_document:{
+          ref:r.id, document_no:r.docNo.value,
+          image:'claims/' + c.id + '/' + r.id + '.jpg',
+          merchant:r.merchant.value, country:r.country.value
+        },
+        description_original:l.orig.value,
+        description_en:l.gloss.value,
+        quantity:Number(l.qty.value),
+        unit_price_original:Number(l.unit.value),
+        amount_original:Number(l.total.value),
+        currency_original:r.currency.value,
+        transaction_date:r.date.value,
+        amount_base:round2(l._base),
+        base_currency:BASE,
+        fx_rate:fx.rate,
+        fx_rate_date:fx.date,
+        fx_source:fx.source,
+        fx_overridden:fx.overridden,
+        tax:{
+          rate_pct:Number(l.taxRate.value) || null,
+          inclusive:r.taxInclusive,
+          amount_original:Number(l.taxRate.value) ? round2(l._taxOrig) : null,
+          amount_base:Number(l.taxRate.value) ? round2(l._tax) : null,
+          recoverable:Number(l.taxRate.value) > 0 && l._status !== 'excluded'
+        },
+        category:l.cat.value,
+        policy_outcome:l._status,
+        policy_rules:(l._rules || []).map(x => ({rule_id:x.id, effect:x.effect, detail:x.detail})),
+        note:l.note || null,
+        allocation:alloc,
+        extraction:{
+          confidence:round2(l._minConf),
+          human_edited:editedFields.length > 0,
+          edited_fields:editedFields,
+          ai_proposed:editedFields.reduce((o, k) => { o[k] = l[k].ai; return o; }, {})
+        }
+      });
+    });
+  });
+
+  return {
+    claim:{
+      id:c.id, status:c.status, title:c.title,
+      traveller:{name:c.traveller, role:c.role},
+      period:c.period, submitted_on:c.submittedOn,
+      base_currency:BASE,
+      policy_set:state.policy.filter(p => p.enabled).map(p => p.id),
+      generated_at:TODAY
+    },
+    summary:{
+      gross_document_total:round2(t.gross),
+      excluded_total:round2(t.excluded),
+      reimbursable_total:round2(t.reimbursable),
+      flagged_for_review_total:round2(t.review),
+      recoverable_vat_total:round2(t.vat),
+      by_cost_object:Object.keys(t.byTarget).map(k => {
+        const tg = targetById(k);
+        return {cost_object_id:k, cost_object:tg ? tg.name : k, amount_base:round2(t.byTarget[k])};
+      }),
+      by_owner_account:Object.keys(t.byOwner).map(k => {
+        const o = OWNERS.find(x => x.id === k);
+        return {owner_account:k, owner_name:o ? o.name : 'Internal cost centres',
+                amount_base:round2(t.byOwner[k])};
+      }),
+      exclusions_by_rule:state.policy.map(p => {
+        const b = ruleBite(p.id);
+        return b.lines ? {rule_id:p.id, lines:b.lines, amount_base:round2(b.amount)} : null;
+      }).filter(Boolean)
+    },
+    lines:lines
+  };
+}
+function round2(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+
+function renderPayload(){
+  const p = buildPayload();
+  const json = JSON.stringify(p, null, 2);
+  document.getElementById('pane-payload').innerHTML =
+    (state.claim.receipts.length ? stepper() : '')
+    + '<div class="stack pane-wide">'
+    + '<div class="card"><header class="ruled"><div><h3>' + p.claim.id + '</h3>'
+    + '<p class="desc">' + p.lines.length + ' lines. Carries the FX rate and its date, the rule behind '
+    + 'each exclusion, the vessel and owner, and what the AI read before anyone corrected it.</p></div>'
+    + '<div class="row" style="gap:7px">'
+    + '<button class="btn sm" type="button" id="copyPayload">Copy JSON</button>'
+    + '<button class="btn sm" type="button" id="selectPayload">Select all</button></div></header>'
+    + '<div class="body"><pre class="payload" id="payloadPre">' + esc(json) + '</pre></div></div></div>';
+}
+function portfolio(){
+  const t = claimTotals();
+  const byTarget = {}, byOwner = {};
+  const add = (o, k, v) => { o[k] = (o[k] || 0) + v; };
+  Object.keys(t.byTarget).forEach(k => add(byTarget, k, t.byTarget[k]));
+  Object.keys(t.byOwner).forEach(k => add(byOwner, k, t.byOwner[k]));
+  let vat = t.vat, reimb = t.reimbursable, excl = t.excluded;
+  const excByRule = {};
+  state.policy.forEach(p => { const b = ruleBite(p.id); if (b.lines) excByRule[p.id] = {lines:b.lines, amount:b.amount}; });
+
+  state.history.forEach(h => {
+    vat += h.vat; reimb += h.reimbursable; excl += h.excluded;
+    Object.keys(h.byTarget).forEach(k => {
+      add(byTarget, k, h.byTarget[k]);
+      const o = ownerOfTarget(k);
+      add(byOwner, o ? o.id : 'CC', h.byTarget[k]);
+    });
+    h.exclusions.forEach(e => {
+      if (!excByRule[e.ruleId]) excByRule[e.ruleId] = {lines:0, amount:0};
+      excByRule[e.ruleId].lines += e.lines;
+      excByRule[e.ruleId].amount += e.amount;
+    });
+  });
+  const counts = {draft:0, submitted:0, approved:0};
+  counts[state.claim.status]++;
+  state.history.forEach(h => counts[h.status]++);
+  return {byTarget:byTarget, byOwner:byOwner, vat:vat, reimbursable:reimb, excluded:excl,
+          excByRule:excByRule, counts:counts, draftVat:t.vat};
+}
+
+function renderDashboard(){
+  const p = portfolio();
+  const flagged = [];
+  state.claim.receipts.forEach(r => r.lines.forEach(l => {
+    if (l._status === 'review') flagged.push({r:r, l:l});
+  }));
+
+  const maxT = Math.max.apply(null, Object.keys(p.byTarget).map(k => p.byTarget[k]).concat([1]));
+  const vesselBars = VESSELS.concat(CENTRES).map(v => {
+    const amt = p.byTarget[v.id] || 0;
+    const o = ownerOfTarget(v.id);
+    return '<div class="bar-row"><div class="nm">' + v.name
+      + '<small>' + (o ? o.name : 'internal, not recharged')
+      + (v.imo ? ' · IMO ' + v.imo : '') + '</small></div>'
+      + '<div class="bar-track"><i class="' + (amt === maxT ? 'lead' : (o ? '' : 'hatch'))
+      + '" style="width:' + (amt / maxT * 100).toFixed(1) + '%"></i></div>'
+      + '<div class="vv">' + eur(amt) + '</div></div>';
+  }).join('');
+
+  const maxO = Math.max.apply(null, Object.keys(p.byOwner).map(k => p.byOwner[k]).concat([1]));
+  const ownerBars = OWNERS.map(o => o.id).concat(['CC']).map(k => {
+    const o = OWNERS.find(x => x.id === k);
+    const amt = p.byOwner[k] || 0;
+    return '<div class="bar-row"><div class="nm">' + (o ? o.name : 'Internal cost centres')
+      + '<small>' + (o ? o.agreement : 'not recharged') + '</small></div>'
+      + '<div class="bar-track"><i class="' + (amt === maxO ? 'lead' : (o ? '' : 'hatch'))
+      + '" style="width:' + (amt / maxO * 100).toFixed(1) + '%"></i></div>'
+      + '<div class="vv">' + eur(amt) + '</div></div>';
+  }).join('');
+
+  const excRows = Object.keys(p.excByRule).map(id => {
+    const r = ruleById(id), b = p.excByRule[id];
+    return '<tr><td>' + (r ? r.title : 'Extraction confidence floor')
+      + '<div class="muted" style="font-size:11.5px;margin-top:2px">' + id + '</div></td>'
+      + '<td class="num r">' + b.lines + '</td><td class="num r">' + eur(b.amount) + '</td>'
+      + '<td>' + (r ? (r.enabled ? '<span class="badge outline dot">on</span>'
+                                 : '<span class="badge striped">off</span>')
+                    : '<span class="badge outline">system</span>') + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" class="empty">No rule has bitten yet.</td></tr>';
+
+  const flagRows = flagged.length ? flagged.map(f =>
+      '<tr><td>' + esc(f.l.gloss.value)
+      + '<div class="muted" style="font-size:11.5px;margin-top:2px">'
+      + esc(String(f.r.merchant.value).split(' (')[0]) + ' · ' + f.r.date.value + '</div></td>'
+      + '<td class="num r">' + eur(f.l._base) + '</td>'
+      + '<td style="max-width:38ch">' + (f.l._rules || []).filter(x => x.effect === 'review')
+          .map(x => x.detail).join('; ')
+      + (f.l.note ? '<div class="muted" style="font-size:11.5px;margin-top:3px">Note: '
+          + esc(f.l.note) + '</div>' : '') + '</td></tr>').join('')
+    : '<tr><td colspan="3" class="empty">Nothing is waiting on a human.</td></tr>';
+
+  const waiting = state.history.filter(h => h.status === 'submitted');
+  const rechargeTab = state.dashTab.recharge;
+  const attentionTab = state.dashTab.attention;
+
+  const tabs = (group, opts) => '<div class="tabs">'
+    + opts.map(o => '<button type="button" role="tab" data-dashtab="' + group + ':' + o[0] + '"'
+        + ' aria-selected="' + (state.dashTab[group] === o[0]) + '">' + o[1] + '</button>').join('')
+    + '</div>';
+
+  document.getElementById('pane-dashboard').innerHTML =
+    '<div class="stack pane-wide">'
+
+    + '<div class="dash-top">'
+    + '<div class="stat hero"><div class="k">Reimbursable, all claims</div>'
+    + '<div class="v">EUR ' + eur(p.reimbursable) + '</div>'
+    + '<div class="s">EUR ' + eur(p.vat) + ' of that is recoverable VAT. EUR ' + eur(p.excluded)
+    + ' was excluded by policy before it got here.</div></div>'
+    + '<div class="stat"><div class="k">Open</div><div class="v">' + p.counts.draft + '</div>'
+    + '<div class="s">draft, not yet submitted</div></div>'
+    + '<div class="stat"><div class="k">Awaiting approval</div><div class="v">' + waiting.length + '</div>'
+    + '<div class="s">' + (waiting.length
+        ? 'longest ' + Math.max.apply(null, waiting.map(h => daysSince(h.submittedOn))) + ' days'
+        : 'nothing pending') + '</div></div>'
+    + '<div class="stat"><div class="k">Needs a human</div><div class="v">' + flagged.length + '</div>'
+    + '<div class="s">lines flagged for review</div></div>'
+    + '<div class="stat"><div class="k">Approved</div><div class="v">' + p.counts.approved + '</div>'
+    + '<div class="s">closed and recharged</div></div></div>'
+
+    + '<div class="card"><header class="ruled"><div><h3>Recharge</h3>'
+    + '<p class="desc">Who carries the cost, in EUR, across every loaded claim.</p></div>'
+    + tabs('recharge', [['vessel','By vessel'],['owner','By owner']]) + '</header>'
+    + '<div class="body"><div class="bars">'
+    + (rechargeTab === 'vessel' ? vesselBars : ownerBars) + '</div></div></div>'
+
+    + '<div class="card"><header class="ruled"><div><h3>Needs attention</h3>'
+    + '<p class="desc">' + (attentionTab === 'flagged'
+        ? 'Lines a human has to look at before approval.'
+        : 'Which rules actually bite, so a policy owner can see what the set is doing.') + '</p></div>'
+    + tabs('attention', [['flagged','Flagged lines'],['rules','By rule']]) + '</header>'
+    + '<div class="body tight"><div class="tbl-wrap"><table class="tbl">'
+    + (attentionTab === 'flagged'
+        ? '<thead><tr><th>Item</th><th class="r">EUR</th><th>Why</th></tr></thead><tbody>' + flagRows + '</tbody>'
+        : '<thead><tr><th>Rule</th><th class="r">Lines</th><th class="r">EUR</th><th>State</th></tr></thead>'
+          + '<tbody>' + excRows + '</tbody>')
+    + '</table></div></div></div>'
+
+    + '<div class="card"><header class="ruled"><div><h3>Claims</h3>'
+    + '<p class="desc">One open, two closed.</p></div></header>'
+    + '<div class="body tight"><div class="tbl-wrap"><table class="tbl">'
+    + '<thead><tr><th>Trip</th><th class="r">Reimbursable</th><th>Status</th></tr></thead><tbody>'
+    + claimRow(state.claim.id, state.claim.title, claimTotals().reimbursable,
+               state.claim.status, state.claim.submittedOn)
+    + state.history.map(h => claimRow(h.id, h.title, h.reimbursable, h.status, h.submittedOn)).join('')
+    + '</tbody></table></div></div></div></div>';
+
+  function claimRow(id, title, reimb, status, on){
+    const wait = status === 'submitted' && on ? ' · waiting ' + daysSince(on) + ' days' : '';
+    return '<tr><td>' + title
+      + '<div class="muted" style="font-size:11.5px;margin-top:2px">' + id + wait + '</div></td>'
+      + '<td class="num r">' + eur(reimb) + '</td>'
+      + '<td><span class="badge ' + (status === 'draft' ? 'outline' : status === 'submitted' ? 'striped' : 'solid')
+      + '">' + status + '</span></td></tr>';
+  }
+}
+const SUGGESTIONS = [
+  'Which claims are awaiting approval, and for how long?',
+  'How much has been recharged to Helios Maritime?',
+  'Which lines were excluded, and under which rule?',
+  'How much recoverable VAT is sitting in unsubmitted claims?',
+  'What is the total per vessel?',
+  'What was the exchange rate on the Busan receipt?'
+];
+
+function answer(q){
+  const s = q.toLowerCase();
+  const t = claimTotals(), p = portfolio();
+  const has = w => s.indexOf(w) >= 0;
+
+  if (has('approval') || has('awaiting') || has('pending') || has('how long')){
+    const subs = state.history.filter(h => h.status === 'submitted')
+      .concat(state.claim.status === 'submitted' ? [{id:state.claim.id, title:state.claim.title,
+        reimbursable:t.reimbursable, submittedOn:state.claim.submittedOn}] : []);
+    if (!subs.length) return {text:'No claim is currently awaiting approval.',
+      cites:[state.claim.id].concat(state.history.map(h => h.id))};
+    return {
+      text:subs.length + ' claim' + (subs.length === 1 ? ' is' : 's are') + ' awaiting approval, as at ' + TODAY + '.',
+      list:subs.map(h => h.id + ' — ' + h.title + ' — EUR ' + eur(h.reimbursable)
+        + ', submitted ' + h.submittedOn + ', waiting ' + daysSince(h.submittedOn) + ' days'),
+      cites:subs.map(h => h.id)
+    };
+  }
+
+  const owner = OWNERS.find(o => has(o.name.toLowerCase().split(' ')[0]));
+  if (owner || has('owner')){
+    if (owner){
+      const amt = p.byOwner[owner.id] || 0;
+      const draft = claimTotals().byOwner[owner.id] || 0;
+      const hist = state.history.filter(h => Object.keys(h.byTarget)
+        .some(k => { const o = ownerOfTarget(k); return o && o.id === owner.id; }));
+      return {
+        text:'EUR ' + eur(amt) + ' is recharged to ' + owner.name + ' across the loaded claims, of which '
+          + 'EUR ' + eur(draft) + ' sits in the open claim ' + state.claim.id + ' and is not yet submitted.',
+        list:['Agreement basis: ' + owner.agreement,
+              'Vessels under this account: ' + VESSELS.filter(v => v.owner === owner.id).map(v => v.name).join(', ')],
+        cites:[state.claim.id].concat(hist.map(h => h.id))
+      };
+    }
+    return {
+      text:'Recharge per owner account across the loaded claims:',
+      list:Object.keys(p.byOwner).map(k => {
+        const o = OWNERS.find(x => x.id === k);
+        return (o ? o.name + ' (' + o.id + ')' : 'Internal cost centres') + ' — EUR ' + eur(p.byOwner[k]);
+      }),
+      cites:[state.claim.id].concat(state.history.map(h => h.id))
+    };
+  }
+
+  if (has('exclud') || has('rule') || has('policy') || has('alcohol')){
+    const rows = [];
+    state.claim.receipts.forEach(r => r.lines.forEach(l => {
+      if (l._status !== 'excluded') return;
+      const rule = (l._rules || []).find(x => x.effect === 'excluded');
+      rows.push({id:l.id, txt:l.gloss.value + ' — ' + r.currency.value + ' '
+        + money(l.total.value, r.currency.value) + ' (EUR ' + eur(l._base) + ') — '
+        + (rule ? rule.id : 'no rule') + ' — ' + r.merchant.value});
+    }));
+    if (!rows.length) return {
+      text:'No line in the open claim is currently excluded. POL-001 is '
+        + (ruleById('POL-001').enabled ? 'active but no line is categorised Alcohol'
+                                       : 'switched off, so alcohol lines are being carried') + '.',
+      cites:[state.claim.id]};
+    return {
+      text:rows.length + ' line' + (rows.length === 1 ? '' : 's') + ' excluded in ' + state.claim.id
+        + ', totalling EUR ' + eur(t.excluded) + '. Historic claims add EUR '
+        + eur(p.excluded - t.excluded) + ' under POL-001.',
+      list:rows.map(x => x.txt),
+      cites:rows.map(x => x.id).concat(state.history.map(h => h.id))
+    };
+  }
+
+  if (has('vat') || has('reclaim') || has('recover')){
+    const unsub = state.claim.status === 'draft' ? t.vat : 0;
+    return {
+      text:'EUR ' + eur(unsub) + ' of recoverable VAT is sitting in unsubmitted claims — all of it in '
+        + state.claim.id + ', which is still a draft. Across every loaded claim the figure is EUR '
+        + eur(p.vat) + '.',
+      list:state.claim.receipts.map(r => {
+        const rt = receiptTotals(r);
+        return r.id + ' — ' + r.merchant.value + ' — EUR ' + eur(rt.vat)
+          + (rt.vat === 0 ? ' (no VAT shown on the document)' : '');
+      }),
+      cites:[state.claim.id].concat(state.claim.receipts.map(r => r.id))
+    };
+  }
+
+  if (has('vessel') || has('per vessel') || VESSELS.some(v => has(v.name.toLowerCase().split(' ')[1] || ''))){
+    return {
+      text:'Reimbursable cost per vessel across the loaded claims:',
+      list:VESSELS.concat(CENTRES).map(v => {
+        const o = ownerOfTarget(v.id);
+        return v.name + (v.imo ? ' (IMO ' + v.imo + ')' : '') + ' — EUR ' + eur(p.byTarget[v.id] || 0)
+          + (o ? ' — recharged to ' + o.name : ' — internal, not recharged');
+      }),
+      cites:[state.claim.id].concat(state.history.map(h => h.id))
+    };
+  }
+
+  if (has('rate') || has('exchange') || has('fx') || has('convert')){
+    return {
+      text:'Rates applied in ' + state.claim.id + ', each keyed to its own transaction date:',
+      list:state.claim.receipts.map(r => {
+        const fx = r._fx;
+        return r.id + ' — ' + r.currency.value + ' on ' + r.date.value + ' — '
+          + (fx.rate === null ? 'no rate held'
+             : '1 ' + r.currency.value + ' = ' + fx.rate.toFixed(6) + ' EUR (rate date ' + fx.date + ')')
+          + (fx.overridden ? ' — manually overridden' : '');
+      }).concat(['Source: ' + FX_SOURCE + '. Fixture data, not a live feed.']),
+      cites:state.claim.receipts.map(r => r.id)
+    };
+  }
+
+  if (has('total') || has('how much') || has('claim')){
+    return {
+      text:'Open claim ' + state.claim.id + ': EUR ' + eur(t.gross) + ' gross on the documents, EUR '
+        + eur(t.excluded) + ' excluded by policy, EUR ' + eur(t.reimbursable) + ' reimbursable, of which EUR '
+        + eur(t.review) + ' is flagged for review. Recoverable VAT EUR ' + eur(t.vat) + '.',
+      cites:[state.claim.id]
+    };
+  }
+
+  return {
+    text:'The loaded claim data does not support an answer to that. I can only work from '
+      + (1 + state.history.length) + ' claims — ' + state.claim.id + ', '
+      + state.history.map(h => h.id).join(', ') + ' — and I will not put a number to anything outside them.',
+    list:['Try: awaiting approval · recharge per owner · excluded lines and their rule · recoverable VAT · '
+      + 'totals per vessel · the FX rate on a document'],
+    cites:[]
+  };
+}
+
+function renderAsk(){
+  const log = state.askLog.map(m => m.role === 'you'
+    ? '<div class="msg you">' + esc(m.text) + '</div>'
+    : '<div class="msg bot"><div class="hdr">Answered from claim data</div>'
+      + '<div>' + m.text + '</div>'
+      + (m.list ? '<ul>' + m.list.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '')
+      + (m.cites && m.cites.length
+          ? '<div class="cites"><span>cited:</span>' + m.cites.map(c => '<b>' + c + '</b>').join('')
+            + '</div>'
+          : '<div class="cites"><span>no figures asserted</span></div>')
+      + '</div>').join('');
+
+  document.getElementById('pane-ask').innerHTML =
+    '<div class="stack pane-wide" style="max-width:920px">'
+    + '<div class="card"><header class="ruled"><div><h3>Ask the claim data</h3>'
+    + '<p class="desc">' + (1 + state.history.length) + ' claims in scope. Every answer names its sources, '
+    + 'and refuses rather than guessing.</p></div></header>'
+    + '<div class="body">'
+    + (log ? '<div class="chat" id="chat">' + log + '</div>'
+           : '<div class="empty">No questions yet. Pick one below.</div>')
+    + '<div class="chips" style="margin-top:14px">'
+    + SUGGESTIONS.map(q => '<button class="chip" type="button" data-ask="' + esc(q) + '">'
+        + esc(q) + '</button>').join('')
+    + '</div>'
+    + '<form class="ask-form" id="askForm"><input class="input" id="askInput"'
+    + ' placeholder="Ask about the loaded claims…" autocomplete="off">'
+    + '<button class="btn primary" type="submit">Ask</button></form>'
+    + '</div></div></div>';
+}
+</script>
+<script>
+/* ══ Finance app ════════════════════════════════════════════════════
+   The Limassol office side. Claims arrive already checked and tagged by
+   the superintendent; this app decides what happens to them — policy,
+   apportionment across vessels and owner accounts, recoverable VAT,
+   approval, and the payload the ledger consumes. */
+
+const state = {
+  view:'inbox',
+  policy:POLICY.map(r => Object.assign({}, r)),
+  claim:{
+    id:'CLM-2026-0184', status:'submitted', submittedOn:'2026-09-04',
+    title:'Busan · Shanghai · Piraeus — attendance trip',
+    traveller:'D. Charalambous', role:'Senior Technical Superintendent',
+    period:'17–25 Aug 2026',
+    legs:[['17–19 Aug','Busan (KR)'],['19–22 Aug','Shanghai (CN)'],['24–25 Aug','Piraeus (GR)']],
+    receipts:[]
+  },
+  history:[
+    {id:'CLM-2026-0171', status:'submitted', submittedOn:'2026-08-27',
+     title:'Rotterdam & Hamburg — Aegean Trader BWTS retrofit', traveller:'D. Charalambous',
+     gross:1284.40, excluded:96.20, reimbursable:1188.20, vat:143.60,
+     byTarget:{'V-AEG':1188.20},
+     exclusions:[{ruleId:'POL-001', lines:3, amount:96.20}]},
+    {id:'CLM-2026-0166', status:'approved', submittedOn:'2026-07-24',
+     title:'Singapore — Kyrenia Star annual survey', traveller:'A. Michaelides',
+     gross:2051.85, excluded:178.40, reimbursable:1873.45, vat:61.05,
+     byTarget:{'V-KYR':1685.20,'CC-LIM':188.25},
+     exclusions:[{ruleId:'POL-001', lines:4, amount:178.40}]}
+  ],
+  audit:[],
+  activeReceipt:null,
+  askLog:[],
+  dashTab:{recharge:'vessel', attention:'flagged'},
+  approved:false
+};
+
+const MAIN_NAV = [
+  {id:'inbox',   label:'Inbox',      glyph:'inbox'},
+  {id:'extract', label:'Review',     glyph:'file'},
+  {id:'alloc',   label:'Apportion',  glyph:'split'},
+  {id:'payload', label:'To the ledger', glyph:'ledger'}
+];
+const UTIL_NAV = [
+  {id:'dashboard', label:'Dashboard',    glyph:'dashboard'},
+  {id:'policy',    label:'Policy rules', glyph:'scale'},
+  {id:'ask',       label:'Ask the data', glyph:'ask'}
+];
+const CLAIM_VIEWS = ['extract','alloc','payload','policy'];
+const DOC_VIEWS = ['extract','alloc'];
+const PANE_COPY = {
+  inbox:['Inbox', 'What the superintendents have sent in.'],
+  extract:['Review', 'What was read, what the traveller corrected, and what policy did to it.'],
+  policy:['Policy rules', 'Configured per client. Toggle one and every claim total moves.'],
+  alloc:['Apportion', 'Percentages per vessel, and therefore per owner account.'],
+  payload:['To the ledger', 'The structured claim an accounting system would consume.'],
+  dashboard:['Dashboard', 'Across all three claims — two open, one closed.'],
+  ask:['Ask the data', 'Answered from the loaded claims only, with sources named.']
+};
+
+/* what the superintendent already did, before finance opened it */
+function seedFromSuperintendent(){
+  FIXTURES.forEach(f => state.claim.receipts.push(instantiate(f)));
+  state.claim.receipts.forEach(r => {
+    r.confirmed = true;
+    r.tags = r.alloc.map(a => a.target);
+  });
+  /* the handwritten taxi: the traveller corrected the misread total */
+  const taxi = receipt('RCP-04');
+  if (taxi){
+    setField(taxi.lines[0].total, 34);
+    state.audit.push({receipt:'RCP-04', field:'RCP-04-L1 · amount', from:'84', to:'34',
+      at:'by D. Charalambous, 03 Sep'});
+  }
+}
+
+function stepper(){ return ''; }   /* finance has no wizard — it has a console */
+
+/* ── chrome ──────────────────────────────────────────────────────── */
+function renderChrome(){
+  const c = state.claim;
+  const waiting = state.history.filter(h => h.status === 'submitted').length
+    + (c.status === 'submitted' && !state.approved ? 1 : 0);
+
+  const navItem = v => {
+    const active = state.view === v.id;
+    const badge = v.id === 'inbox' && waiting ? String(waiting) : '';
+    return '<li class="' + (active ? 'on' : '') + '">'
+      + '<button type="button" data-view="' + v.id + '">'
+      + '<span class="n">' + icon(v.glyph) + '</span><span>' + v.label + '</span>'
+      + '<span class="tick">' + badge + '</span></button></li>';
+  };
+  document.getElementById('mainNav').innerHTML = MAIN_NAV.map(navItem).join('');
+  document.getElementById('utilNav').innerHTML = UTIL_NAV.map(navItem).join('');
+
+  const copy = PANE_COPY[state.view];
+  document.getElementById('paneTitle').textContent = copy[0];
+  /* on the claim screens the header carries which claim you are in, so
+     the sidebar does not have to repeat it on every page */
+  const onClaimPage = ['extract','alloc','payload'].indexOf(state.view) >= 0;
+  document.getElementById('paneLede').textContent = onClaimPage
+    ? c.id + ' from ' + c.traveller + ', sent in ' + c.submittedOn
+      + ' and waiting ' + daysSince(c.submittedOn) + ' days'
+    : copy[1];
+
+  const tabs = document.getElementById('quickTabs');
+  if (DOC_VIEWS.indexOf(state.view) >= 0 && c.receipts.length){
+    tabs.style.display = 'flex';
+    tabs.innerHTML = c.receipts.map(r =>
+      '<button type="button" role="tab" data-rcp="' + r.id + '"'
+      + ' aria-selected="' + (state.activeReceipt === r.id) + '">'
+      + r.id.replace('RCP-', '#') + '</button>').join('');
+  } else { tabs.style.display = 'none'; tabs.innerHTML = ''; }
+
+  const strip = document.getElementById('summaryStrip');
+  const onClaim = CLAIM_VIEWS.indexOf(state.view) >= 0;
+  strip.style.display = onClaim ? 'flex' : 'none';
+  if (!onClaim){ strip.innerHTML = ''; return; }
+  const t = claimTotals();
+  strip.innerHTML =
+      cell('Claimed', 'EUR ' + eur(t.gross), '')
+    + cell('Excluded', 'EUR ' + eur(t.excluded), 'strike')
+    + cell('Payable', 'EUR ' + eur(t.reimbursable), '')
+    + cell('Recoverable VAT', 'EUR ' + eur(t.vat), '')
+    + cell('To review', 'EUR ' + eur(t.review), '');
+  function cell(k, v, cls){
+    return '<div class="cell ' + cls + '"><div class="k">' + k + '</div>'
+      + '<div class="v">' + v + '</div></div>';
+  }
+}
+
+/* ── inbox ───────────────────────────────────────────────────────── */
+function renderInbox(){
+  const t = claimTotals();
+  const rows = [];
+
+  rows.push(row(state.claim.id, state.claim.title, state.claim.traveller,
+    state.claim.submittedOn, t.reimbursable, t.vat, t.review,
+    state.approved ? 'approved' : 'to review', true));
+  state.history.forEach(h => rows.push(row(h.id, h.title, h.traveller, h.submittedOn,
+    h.reimbursable, h.vat, 0, h.status === 'submitted' ? 'to review' : 'approved', false)));
+
+  const toReview = rows.filter(r => r.indexOf('to review') >= 0).length;
+
+  document.getElementById('pane-inbox').innerHTML =
+    '<div class="stack pane-wide">'
+    + '<div class="dash-top">'
+    + '<div class="stat hero"><div class="k">Waiting on you</div>'
+    + '<div class="v">' + toReview + '</div>'
+    + '<div class="s">' + (toReview
+        ? 'The oldest has been sitting ' + Math.max.apply(null,
+            state.history.filter(h => h.status === 'submitted')
+              .map(h => daysSince(h.submittedOn))
+              .concat(state.approved ? [0] : [daysSince(state.claim.submittedOn)]))
+          + ' days. Superintendents have already checked and tagged these.'
+        : 'Nothing outstanding.') + '</div></div>'
+    + '<div class="stat"><div class="k">Payable, open claims</div><div class="v">'
+    + eur(t.reimbursable) + '</div><div class="s">EUR, this claim</div></div>'
+    + '<div class="stat"><div class="k">Recoverable VAT</div><div class="v">'
+    + eur(t.vat) + '</div><div class="s">not yet reclaimed</div></div>'
+    + '<div class="stat"><div class="k">Flagged lines</div><div class="v">'
+    + flaggedLines().length + '</div><div class="s">over a cap, or read poorly</div></div>'
+    + '<div class="stat"><div class="k">Excluded by policy</div><div class="v">'
+    + eur(t.excluded) + '</div><div class="s">before it reached you</div></div>'
+    + '</div>'
+
+    + '<div class="card"><header class="ruled"><div><h3>Claims</h3>'
+    + '<p class="desc">Open one to review the lines, then apportion it.</p></div></header>'
+    + '<div class="body tight"><div class="tbl-wrap"><table class="tbl">'
+    + '<thead><tr><th>Claim</th><th>Traveller</th><th class="r">Payable</th>'
+    + '<th class="r">VAT</th><th class="r">Flagged</th><th>Status</th><th></th></tr></thead>'
+    + '<tbody>' + rows.join('') + '</tbody></table></div></div></div></div>';
+
+  function row(id, title, who, on, payable, vat, review, status, open){
+    return '<tr><td>' + title
+      + '<div class="muted" style="font-size:11.5px;margin-top:2px">' + id
+      + ' · sent ' + on + ' · ' + daysSince(on) + ' days</div></td>'
+      + '<td>' + who + '</td>'
+      + '<td class="num r">' + eur(payable) + '</td>'
+      + '<td class="num r">' + eur(vat) + '</td>'
+      + '<td class="num r">' + (review > 0 ? eur(review) : '—') + '</td>'
+      + '<td><span class="badge ' + (status === 'approved' ? 'solid' : 'striped') + '">'
+      + status + '</span></td>'
+      + '<td class="r">' + (open
+          ? '<button class="btn xs" type="button" data-view="extract">Open</button>'
+          : '<span class="muted" style="font-size:11.5px">no line detail in this demo</span>') + '</td></tr>';
+  }
+}
+
+function flaggedLines(){
+  const out = [];
+  state.claim.receipts.forEach(r => r.lines.forEach(l => {
+    if (l._status === 'review') out.push({r:r, l:l});
+  }));
+  return out;
+}
+
+/* ── review ──────────────────────────────────────────────────────── */
+function travellerCard(r){
+  const edits = state.audit.filter(a => a.receipt === r.id);
+  return '<div class="card"><header class="ruled"><div><h3>What the traveller did</h3>'
+    + '<p class="desc">Kept alongside what the AI proposed. This is what makes the claim '
+    + 'auditable rather than just fast.</p></div>'
+    + '<span class="badge outline">' + edits.length + ' correction'
+    + (edits.length === 1 ? '' : 's') + '</span></header>'
+    + '<div class="body tight">'
+    + (edits.length
+        ? '<table class="audit"><thead><tr><th>Field</th><th>AI read</th>'
+          + '<th>Corrected to</th><th>By</th></tr></thead><tbody>'
+          + edits.map(a => '<tr><td>' + esc(a.field) + '</td><td>' + esc(a.from)
+            + '</td><td><b>' + esc(a.to) + '</b></td><td>' + a.at + '</td></tr>').join('')
+          + '</tbody></table>'
+        : '<div class="empty">Nothing was corrected on this document — every value is as read.</div>')
+    + '</div>'
+    /* The two evidence facts the rules turn on. They live here, on the
+       document they describe, rather than in a card of their own. */
+    + '<footer><div class="muted" style="font-size:12.5px">'
+    + 'Tagged to ' + (r.tags || []).map(id => {
+        const v = targetById(id); return v ? v.name : id;
+      }).join(' and ') + '</div>'
+    + '<div class="row" style="gap:7px">'
+    + att(r, 'itemisedInvoice', 'Itemised invoice held', 'No itemised invoice')
+    + att(r, 'clientEntertainment', 'Client entertained', 'No client entertained')
+    + '</div></footer></div>';
+
+  function att(rc, key, onText, offText){
+    return '<button type="button" class="att' + (rc[key] ? ' on' : '') + '"'
+      + ' data-att="' + key + '" data-rcp="' + rc.id + '"'
+      + ' title="Affects which policy rules apply">'
+      + (rc[key] ? icon('check',14) + onText : offText) + '</button>';
+  }
+}
+
+function renderReview(){
+  const r = state.claim.receipts.find(x => x.id === state.activeReceipt);
+  if (!r) return;
+  const others = state.claim.receipts.filter(x => x.id !== r.id);
+  document.getElementById('pane-extract').innerHTML =
+    '<div class="split">' + docColumn(r)
+    + '<div class="stack">'
+    + ledgerCard(r) + travellerCard(r) + notesCard(r)
+    + '<div class="card"><footer style="border-top:0">'
+    + '<div class="muted" style="font-size:12.5px;max-width:46ch">'
+    + 'Policy is configured under Policy rules — changing it there moves every claim.</div>'
+    + '<div class="row" style="gap:8px">'
+    + (others.length
+        ? '<button class="btn" type="button" data-rcp="' + others[0].id + '"'
+          + ' data-rcpgo="1">Next receipt</button>' : '')
+    + '<button class="btn primary" type="button" data-view="alloc">Apportion this claim</button>'
+    + '</div></footer></div>'
+    + '</div></div>';
+}
+
+/* ── policy ──────────────────────────────────────────────────────── */
+function renderPolicy(){
+  const r = state.claim.receipts.find(x => x.id === state.activeReceipt);
+  document.getElementById('pane-policy').innerHTML =
+    '<div class="stack pane-wide" style="max-width:940px">'
+    + policyCard()
+    + (r ? outcomeCard(r) : '')
+    + '<div class="card"><footer style="border-top:0">'
+    + '<div class="muted" style="font-size:12.5px;max-width:46ch">'
+    + 'The traveller never sees these switches — they only see that a line came off, and why.</div>'
+    + '<button class="btn primary" type="button" data-view="extract">Back to the claim</button>'
+    + '</footer></div></div>';
+}
+
+/* ── apportion ───────────────────────────────────────────────────── */
+function renderAlloc(){
+  const r = state.claim.receipts.find(x => x.id === state.activeReceipt);
+  if (!r) return;
+  const rs = state.claim.receipts;
+  const balanced = rs.every(x => receiptAllocValid(x));
+  const t = claimTotals();
+
+  const perOwner = Object.keys(t.byOwner).map(k => {
+    const o = OWNERS.find(x => x.id === k);
+    return '<div class="sum-row"><div><div style="font-weight:500">'
+      + (o ? o.name : 'Internal cost centres') + '</div>'
+      + '<div class="muted" style="font-size:11.5px;margin-top:2px">'
+      + (o ? o.agreement : 'not recharged to an owner') + '</div></div>'
+      + '<div style="font-weight:500">EUR ' + eur(t.byOwner[k]) + '</div></div>';
+  }).join('');
+
+  document.getElementById('pane-alloc').innerHTML =
+    '<div class="split">' + docColumn(r)
+    + '<div class="stack">'
+    + '<div class="callout"><strong>The traveller tagged '
+    + (r.tags || []).map(id => { const v = targetById(id); return v ? v.name : id; }).join(' and ')
+    + '.</strong> Setting the percentages is yours — they carry the management agreement.</div>'
+    + allocCard(r)
+    + '<div class="card"><header class="ruled"><div><h3>Recharged to</h3>'
+    + '<p class="desc">Across the whole claim, once every receipt is apportioned.</p></div></header>'
+    + '<div class="body tight">' + perOwner + '</div></div>'
+    + '<div class="card"><footer style="border-top:0">'
+    + '<div class="muted" style="font-size:12.5px;max-width:46ch">'
+    + (state.approved ? 'Approved. The payload is ready.'
+        : balanced ? 'Every receipt balances to 100%.'
+        : 'Approval is blocked until every split sums to 100%.') + '</div>'
+    + '<div class="row" style="gap:8px">'
+    + '<button class="btn" type="button" data-view="extract">Back</button>'
+    + '<button class="btn" type="button" id="returnClaim">Return to traveller</button>'
+    + '<button class="btn ' + (balanced && !state.approved ? 'primary' : '') + '" type="button"'
+    + ' id="approveClaim"' + (balanced && !state.approved ? '' : ' disabled') + '>'
+    + (state.approved ? 'Approved ✓' : 'Approve claim') + '</button>'
+    + '</div></footer></div>'
+    + '</div></div>';
+}
+
+/* ── dispatcher ──────────────────────────────────────────────────── */
+const RENDERERS = {inbox:renderInbox, extract:renderReview, policy:renderPolicy,
+  alloc:renderAlloc, payload:renderPayload, dashboard:renderDashboard,
+  ask:renderAsk};
+
+function render(){
+  if (!state.activeReceipt && state.claim.receipts.length){
+    state.activeReceipt = state.claim.receipts[0].id;
+  }
+  evaluateClaim();
+  renderChrome();
+  RENDERERS[state.view]();
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('pane-' + state.view).classList.add('on');
+}
+function go(view){
+  state.view = view;
+  render();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+function afterCapture(){ go('extract'); }
+
+/* ── events ──────────────────────────────────────────────────────── */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-view],[data-rule],[data-splitline],[data-allocdel],'
+    + '[data-allocadd],[data-allocbal],[data-allocclear],[data-ask],[data-fx],[data-dashtab],'
+    + '[data-att],#approveClaim,#returnClaim,#copyPayload,#selectPayload,#themeBtn,'
+    + '#quickTabs button,[data-rcpgo]');
+  if (!el) return;
+
+  if (el.id === 'themeBtn'){ cycleTheme(); return; }
+  if (el.closest('#quickTabs') || el.dataset.rcpgo){
+    state.activeReceipt = el.dataset.rcp; render(); return;
+  }
+
+  if (el.dataset.dashtab){
+    const p = el.dataset.dashtab.split(':');
+    state.dashTab[p[0]] = p[1];
+    render(); return;
+  }
+  if (el.dataset.att){
+    const r = receipt(el.dataset.rcp);
+    r[el.dataset.att] = !r[el.dataset.att];
+    render();
+    toast('Evidence updated — policy re-evaluated');
+    return;
+  }
+  if (el.dataset.rule){
+    const rule = ruleById(el.dataset.rule);
+    rule.enabled = !rule.enabled;
+    render();
+    toast(rule.id + ' ' + (rule.enabled ? 'on' : 'off') + ' — every total recomputed');
+    return;
+  }
+  if (el.dataset.fx){
+    const r = receipt(el.dataset.fx);
+    if (r.fxOverride){ r.fxOverride = null; toast('Published rate restored'); }
+    else {
+      const pub = FX_TABLE[r.currency.value + '|' + r.date.value];
+      r.fxOverride = {rate:Number((pub * 1.018).toFixed(6)), date:r.date.value};
+      toast('Settlement rate applied — recorded in the payload');
+    }
+    render(); return;
+  }
+  if (el.dataset.splitline){
+    const r = receipt(el.dataset.rcp), l = lineOf(r, el.dataset.splitline);
+    if (l.alloc && l.alloc.length) l.alloc = null;
+    else l.alloc = r.alloc.map(a => Object.assign({}, a));
+    render(); return;
+  }
+  if (el.dataset.allocadd){
+    const s = scopeOf(el.dataset.rcp, el.dataset.line);
+    s.list.push({target:unusedTarget(s.list), share:0});
+    render(); return;
+  }
+  if (el.dataset.allocdel !== undefined && el.dataset.allocdel !== ''){
+    const s = scopeOf(el.dataset.rcp, el.dataset.line);
+    s.list.splice(Number(el.dataset.allocdel), 1);
+    render(); return;
+  }
+  if (el.dataset.allocbal){
+    balance(scopeOf(el.dataset.rcp, el.dataset.line).list);
+    render(); return;
+  }
+  if (el.dataset.allocclear){
+    const s = scopeOf(el.dataset.rcp, el.dataset.line);
+    if (s.l) s.l.alloc = null;
+    render(); return;
+  }
+
+  if (el.id === 'approveClaim'){
+    if (!state.claim.receipts.every(r => receiptAllocValid(r))) return;
+    state.approved = true;
+    state.claim.status = 'approved';
+    go('payload');
+    toast('Claim approved — payload generated');
+    return;
+  }
+  if (el.id === 'returnClaim'){
+    toast('Returned to D. Charalambous with your notes');
+    return;
+  }
+  if (el.id === 'copyPayload'){
+    const txt = document.getElementById('payloadPre').textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(() => toast('Payload copied'),
+        () => toast('Copy blocked — use Select all'));
+    } else toast('Copy unavailable here — use Select all');
+    return;
+  }
+  if (el.id === 'selectPayload'){
+    const pre = document.getElementById('payloadPre');
+    const sel = window.getSelection(), rng = document.createRange();
+    rng.selectNodeContents(pre); sel.removeAllRanges(); sel.addRange(rng);
+    toast('Selected — copy with Ctrl+C');
+    return;
+  }
+  if (el.dataset.ask){ ask(el.dataset.ask); return; }
+  if (el.dataset.view){ go(el.dataset.view); return; }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target;
+
+  if (el.dataset.fxrate){
+    const r = receipt(el.dataset.fxrate);
+    if (r.fxOverride){ r.fxOverride.rate = Number(el.value); render(); toast('Override rate set'); }
+    return;
+  }
+  if (el.dataset.edit){
+    const r = receipt(el.dataset.rcp);
+    if (!r) return;
+    const path = el.dataset.edit;
+    if (el.dataset.line){
+      const l = lineOf(r, el.dataset.line);
+      if (path === 'note'){ l.note = el.value; render(); return; }
+      const before = l[path].value;
+      const val = ['qty','total','taxRate'].indexOf(path) >= 0 ? Number(el.value) : el.value;
+      if (setField(l[path], val)){
+        logAudit(r.id, l.id + ' · ' + path, String(before), String(val));
+        render();
+        toast('Adjusted by finance — the earlier values are kept');
+      }
+      return;
+    }
+    const before = r[path].value;
+    const val = ['heads','docTotal'].indexOf(path) >= 0 ? Number(el.value) : el.value;
+    if (setField(r[path], val)){
+      logAudit(r.id, path, String(before), String(val));
+      render();
+      toast('Adjusted by finance — the earlier values are kept');
+    }
+    return;
+  }
+  if (el.dataset.alloc){
+    const s = scopeOf(el.dataset.rcp, el.dataset.line);
+    const i = Number(el.dataset.i);
+    if (el.dataset.alloc === 'target') s.list[i].target = el.value;
+    else if (el.dataset.alloc === 'share') s.list[i].share = Number(el.value);
+    else s.list[i].share = s.amt ? Math.round(Number(el.value) / s.amt * 1000) / 10 : 0;
+    render();
+    return;
+  }
+});
+
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'askForm') return;
+  e.preventDefault();
+  const q = document.getElementById('askInput').value.trim();
+  if (q) ask(q);
+});
+function ask(q){
+  state.askLog.push({role:'you', text:q});
+  state.askLog.push(Object.assign({role:'bot'}, answer(q)));
+  render();
+  const chat = document.getElementById('chat');
+  if (chat) chat.scrollTop = chat.scrollHeight;
+}
+
+const THEMES = [
+  {v:null, icon:'monitor', label:'Match system'},
+  {v:'light', icon:'sun', label:'Light'},
+  {v:'dark', icon:'moon', label:'Dark'}
+];
+let themeIdx = 0;
+function cycleTheme(){
+  themeIdx = (themeIdx + 1) % THEMES.length;
+  const t = THEMES[themeIdx];
+  if (t.v) document.documentElement.setAttribute('data-theme', t.v);
+  else document.documentElement.removeAttribute('data-theme');
+  document.getElementById('themeIcon').innerHTML = icon(t.icon, 16);
+  document.getElementById('themeLabel').textContent = t.label;
+}
+
+seedFromSuperintendent();
+
+document.getElementById('themeIcon').innerHTML = icon('monitor', 16);
+render();
+</script>
+</body>
+</html>
